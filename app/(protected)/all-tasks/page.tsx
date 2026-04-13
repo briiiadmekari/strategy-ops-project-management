@@ -3,6 +3,7 @@
 import { TaskTable } from "@/components/TaskTable";
 import { TaskFilter } from "@/components/TaskFilter";
 import { TablePagination } from "@/components/TablePagination";
+import { CreateTaskDialog } from "@/components/CreateTaskDialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { OctagonAlertIcon } from "lucide-react";
 import { useAllTasksPage } from "./hooks/useAllTasksPage";
@@ -30,11 +31,14 @@ export default function AllTasksPage() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">All Tasks</h1>
-        <p className="text-sm text-muted-foreground">
-          All tasks across the team.
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">All Tasks</h1>
+          <p className="text-sm text-muted-foreground">
+            All tasks across the team.
+          </p>
+        </div>
+        <CreateTaskDialog />
       </div>
 
       <TaskFilter

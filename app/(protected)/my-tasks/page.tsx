@@ -3,6 +3,7 @@
 import { TaskTable } from "@/components/TaskTable";
 import { TaskFilter } from "@/components/TaskFilter";
 import { TablePagination } from "@/components/TablePagination";
+import { CreateTaskDialog } from "@/components/CreateTaskDialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { OctagonAlertIcon } from "lucide-react";
 import { useMyTasksPage } from "./hooks/useMyTasksPage";
@@ -28,11 +29,14 @@ export default function MyTasksPage() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">My Tasks</h1>
-        <p className="text-sm text-muted-foreground">
-          Tasks assigned to you.
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">My Tasks</h1>
+          <p className="text-sm text-muted-foreground">
+            Tasks assigned to you.
+          </p>
+        </div>
+        <CreateTaskDialog />
       </div>
 
       <TaskFilter

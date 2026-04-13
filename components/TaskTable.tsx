@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   useReactTable,
   getCoreRowModel,
@@ -16,8 +17,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TaskStatusBadge } from "@/components/TaskStatusBadge";
+import { DeleteTaskDialog } from "@/components/DeleteTaskDialog";
+import { EyeIcon } from "lucide-react";
 import type { Task } from "@/types/task";
 
 const columns: ColumnDef<Task>[] = [
@@ -25,7 +29,12 @@ const columns: ColumnDef<Task>[] = [
     accessorKey: "title",
     header: "Title",
     cell: ({ row }) => (
-      <span className="font-medium">{row.getValue("title")}</span>
+      <Link
+        href={`/tasks/${row.original.id}`}
+        className="font-medium hover:underline"
+      >
+        {row.getValue("title")}
+      </Link>
     ),
   },
   {
@@ -51,6 +60,23 @@ const columns: ColumnDef<Task>[] = [
     header: "Created",
     cell: ({ row }) =>
       format(new Date(row.getValue("created_at") as string), "MMM d, yyyy"),
+  },
+  {
+    id: "actions",
+    header: "",
+    cell: ({ row }) => (
+      <div className="flex items-center gap-1 justify-end">
+        <Button variant="ghost" size="icon-xs" asChild>
+          <Link href={`/tasks/${row.original.id}`}>
+            <EyeIcon />
+          </Link>
+        </Button>
+        <DeleteTaskDialog
+          taskId={row.original.id}
+          taskTitle={row.original.title}
+        />
+      </div>
+    ),
   },
 ];
 

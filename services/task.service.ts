@@ -1,6 +1,7 @@
 import api from "@/services/axios";
 import type { ApiResponse, PaginatedResponse } from "@/types/api";
 import type { Task, TaskFilterParams } from "@/types/task";
+import type { CreateTaskInput } from "@/schema/taskSchema";
 
 export const taskService = {
   /**
@@ -83,6 +84,65 @@ export const taskService = {
   getMembers: () =>
     api
       .get<ApiResponse<Member[]>>("/members")
+      .then((res) => res.data),
+
+  /**
+   * GET /tasks/:id
+   *
+   * Returns a single task by ID.
+   *
+   * Expected response:
+   * {
+   *   error: false,
+   *   message: "Success",
+   *   data: Task
+   * }
+   */
+  getTaskById: (id: string) =>
+    api
+      .get<ApiResponse<Task>>(`/tasks/${id}`)
+      .then((res) => res.data),
+
+  /**
+   * POST /tasks
+   *
+   * Creates a new task.
+   *
+   * Request body:
+   * {
+   *   title: string (required),
+   *   description?: string,
+   *   status?: "BACKLOG" | "NOT_STARTED" | "IN_PROGRESS" | "IN_REVIEW" | "BLOCKED" | "CANCELED" | "COMPLETED" (defaults to "BACKLOG"),
+   *   assignee_id?: string (UUID),
+   *   due_date?: string (ISO 8601, e.g. "2026-04-30")
+   * }
+   *
+   * Expected response:
+   * {
+   *   error: false,
+   *   message: "Task created successfully",
+   *   data: Task
+   * }
+   */
+  createTask: (payload: CreateTaskInput) =>
+    api
+      .post<ApiResponse<Task>>("/tasks", payload)
+      .then((res) => res.data),
+
+  /**
+   * DELETE /tasks/:id
+   *
+   * Deletes a task by ID.
+   *
+   * Expected response:
+   * {
+   *   error: false,
+   *   message: "Task deleted successfully"
+   * }
+   */
+  deleteTask: (id: string) =>
+    api
+      .delete<ApiResponse>(`/tasks/${id}`)
       .then((res) => res.data),
 };
 
