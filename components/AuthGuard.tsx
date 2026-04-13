@@ -1,23 +1,26 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
-import { redirect } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { TOKEN_KEY } from "@/constant/auth";
-
-function subscribeToStorage(callback: () => void) {
-  window.addEventListener("storage", callback);
-  return () => window.removeEventListener("storage", callback);
-}
-
-function getToken() {
-  return sessionStorage.getItem(TOKEN_KEY);
-}
+import { LoadingScreen } from "@/components/LoadingScreen";
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
-  const token = useSyncExternalStore(subscribeToStorage, getToken, () => null);
+  const router = useRouter();
+  const [status, setStatus] = useState<"loading" | "authenticated" | "unauthenticated">("loading");
 
-  if (!token) {
-    redirect("/login");
+  useEffect(() => {
+    const token = sessionStorage.getItem(TOKEN_KEY);
+    if (token) {
+      setStatus("authenticated");
+    } else {
+      setStatus("unauthenticated");
+      router.replace("/login");
+    }
+  }, [router]);
+
+  if (status === "loading" || status === "unauthenticated") {
+    return <LoadingScreen />;
   }
 
   return <>{children}</>;

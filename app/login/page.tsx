@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
-import { useRouter, redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
 
@@ -20,25 +20,16 @@ import { useCountdown } from "./hooks/useCountdown";
 import { EmailForm } from "./components/EmailForm";
 import { OtpForm } from "./components/OtpForm";
 import { TOKEN_KEY } from "@/constant/auth";
+import { LoadingScreen } from "@/components/LoadingScreen";
 
 type Step = "email" | "otp";
 
 const OTP_COOLDOWN_SECONDS = 120;
 
-function subscribeToStorage(callback: () => void) {
-  window.addEventListener("storage", callback);
-  return () => window.removeEventListener("storage", callback);
-}
-
-function getToken() {
-  return sessionStorage.getItem(TOKEN_KEY);
-}
-
 export default function LoginPage() {
   const router = useRouter();
 
-  const token = useSyncExternalStore(subscribeToStorage, getToken, () => null);
-
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [step, setStep] = useState<Step>("email");
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
@@ -48,8 +39,17 @@ export default function LoginPage() {
   const requestOtp = useRequestOtp();
   const verifyOtp = useVerifyOtp();
 
-  if (token) {
-    redirect("/");
+  useEffect(() => {
+    const token = sessionStorage.getItem(TOKEN_KEY);
+    if (token) {
+      router.replace("/");
+    } else {
+      setIsCheckingAuth(false);
+    }
+  }, [router]);
+
+  if (isCheckingAuth) {
+    return <LoadingScreen />;
   }
 
   function getErrorMessage(err: unknown): string {
@@ -112,7 +112,7 @@ export default function LoginPage() {
           if (newToken) {
             sessionStorage.setItem(TOKEN_KEY, newToken);
             toast.success("Signed in successfully");
-            router.push("/");
+            window.location.href = "/";
           } else {
             setError("Authentication succeeded, but no token was received.");
           }
