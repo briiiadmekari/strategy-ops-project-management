@@ -66,8 +66,8 @@ const columns: ColumnDef<Task>[] = [
     header: "",
     cell: ({ row }) => (
       <div className="flex items-center gap-1 justify-end">
-        <Button variant="ghost" size="icon-xs" asChild>
-          <Link href={`/tasks/${row.original.id}`}>
+        <Button variant="ghost" asChild>
+          <Link href={`/tasks/${row.original.id}`} >
             <EyeIcon />
           </Link>
         </Button>

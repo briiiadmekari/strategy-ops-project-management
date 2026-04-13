@@ -47,7 +47,7 @@ export function DeleteTaskDialog({ taskId, taskTitle }: DeleteTaskDialogProps) {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="ghost" size="icon-xs">
+        <Button variant="ghost" className="bg-red-500/10 hover:bg-red-500/20" size="sm">
           <TrashIcon className="text-destructive" />
         </Button>
       </AlertDialogTrigger>

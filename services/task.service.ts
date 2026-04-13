@@ -100,7 +100,7 @@ export const taskService = {
    */
   getTaskById: (id: string) =>
     api
-      .get<ApiResponse<Task>>(`/tasks/${id}`)
+      .get<ApiResponse<Task>>(`/tasks/detail`, { params: { id: id } })
       .then((res) => res.data),
 
   /**
@@ -113,7 +113,7 @@ export const taskService = {
    *   title: string (required),
    *   description?: string,
    *   status?: "BACKLOG" | "NOT_STARTED" | "IN_PROGRESS" | "IN_REVIEW" | "BLOCKED" | "CANCELED" | "COMPLETED" (defaults to "BACKLOG"),
-   *   assignee_id?: string (UUID),
+   *   assignee?: { id: string, name: string, email: string },
    *   due_date?: string (ISO 8601, e.g. "2026-04-30")
    * }
    *
@@ -126,7 +126,7 @@ export const taskService = {
    */
   createTask: (payload: CreateTaskInput) =>
     api
-      .post<ApiResponse<Task>>("/tasks", payload)
+      .post<ApiResponse<Task>>("/tasks/create", payload)
       .then((res) => res.data),
 
   /**
@@ -142,7 +142,9 @@ export const taskService = {
    */
   deleteTask: (id: string) =>
     api
-      .delete<ApiResponse>(`/tasks/${id}`)
+      .delete<ApiResponse>(`/tasks/delete`, {
+        params: { id: id },
+      })
       .then((res) => res.data),
 };
 

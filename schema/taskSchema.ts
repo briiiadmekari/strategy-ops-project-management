@@ -1,5 +1,11 @@
 import { z } from "zod";
 
+const assigneeSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  email: z.string(),
+});
+
 export const createTaskSchema = z.object({
   title: z.string().min(1, "Title is required").max(255),
   description: z.string().max(5000).optional(),
@@ -12,7 +18,7 @@ export const createTaskSchema = z.object({
     "CANCELED",
     "COMPLETED",
   ]).default("BACKLOG"),
-  assignee_id: z.string().uuid().optional(),
+  assignee: assigneeSchema.optional(),
   due_date: z.string().optional(),
 });
 

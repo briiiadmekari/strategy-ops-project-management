@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
+import { format, parse } from "date-fns";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -24,13 +25,74 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Calendar } from "@/components/ui/calendar";
 import { Spinner } from "@/components/ui/spinner";
-import { PlusIcon } from "lucide-react";
+import { PlusIcon, CalendarIcon } from "lucide-react";
 
 import { TASK_STATUSES, TASK_STATUS_LABELS } from "@/constant/task";
 import { createTaskSchema, type CreateTaskInput } from "@/schema/taskSchema";
 import { useCreateTask } from "@/composables/mutations";
 import { useMembers } from "@/composables/queries";
+import { cn } from "@/lib/utils";
+
+function DatePickerField({
+  value,
+  onChange,
+}: {
+  value: string | undefined;
+  onChange: (val: string | undefined) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const selectedDate = value
+    ? parse(value, "yyyy-MM-dd", new Date())
+    : undefined;
+
+  return (
+    <div ref={containerRef} className="relative space-y-2">
+      <Label>Due Date</Label>
+      <Button
+        type="button"
+        variant="outline"
+        className={cn(
+          "w-full justify-start text-left font-normal",
+          !value && "text-muted-foreground"
+        )}
+        onClick={() => setOpen((prev) => !prev)}
+      >
+        <CalendarIcon className="size-4" />
+        {value ? format(selectedDate!, "dd/MM/yyyy") : "Pick a date"}
+      </Button>
+      {open && (
+        <div className="absolute z-50 mt-1 rounded-md border bg-popover shadow-md">
+          <Calendar
+            mode="single"
+            selected={selectedDate}
+            onSelect={(date) => {
+              onChange(date ? format(date, "yyyy-MM-dd") : undefined);
+              setOpen(false);
+            }}
+            initialFocus
+          />
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function CreateTaskDialog() {
   const [open, setOpen] = useState(false);
@@ -38,7 +100,7 @@ export function CreateTaskDialog() {
     title: "",
     description: "",
     status: "BACKLOG",
-    assignee_id: undefined,
+    assignee: undefined,
     due_date: undefined,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -52,7 +114,7 @@ export function CreateTaskDialog() {
       title: "",
       description: "",
       status: "BACKLOG",
-      assignee_id: undefined,
+      assignee: undefined,
       due_date: undefined,
     });
     setErrors({});
@@ -168,13 +230,24 @@ export function CreateTaskDialog() {
             <div className="space-y-2">
               <Label>Assignee</Label>
               <Select
-                value={form.assignee_id ?? "unassigned"}
-                onValueChange={(value) =>
-                  setForm({
-                    ...form,
-                    assignee_id: value === "unassigned" ? undefined : value,
-                  })
-                }
+                value={form.assignee?.id ?? "unassigned"}
+                onValueChange={(value) => {
+                  if (value === "unassigned") {
+                    setForm({ ...form, assignee: undefined });
+                  } else {
+                    const member = members.find((m) => m.id === value);
+                    if (member) {
+                      setForm({
+                        ...form,
+                        assignee: {
+                          id: member.id,
+                          name: member.name,
+                          email: member.email,
+                        },
+                      });
+                    }
+                  }
+                }}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Unassigned" />
@@ -188,23 +261,16 @@ export function CreateTaskDialog() {
                   ))}
                 </SelectContent>
               </Select>
+              {errors.assignee && (
+                <p className="text-xs text-destructive">{errors.assignee}</p>
+              )}
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="due_date">Due Date</Label>
-            <Input
-              id="due_date"
-              type="date"
-              value={form.due_date ?? ""}
-              onChange={(e) =>
-                setForm({
-                  ...form,
-                  due_date: e.target.value || undefined,
-                })
-              }
-            />
-          </div>
+          <DatePickerField
+            value={form.due_date}
+            onChange={(val) => setForm({ ...form, due_date: val })}
+          />
 
           <DialogFooter>
             <Button

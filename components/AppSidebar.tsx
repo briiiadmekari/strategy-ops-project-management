@@ -12,7 +12,6 @@ import {
   SunIcon,
   MoonIcon,
   UsersIcon,
-  SettingsIcon,
 } from "lucide-react";
 
 import {
@@ -27,6 +26,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { Toggle } from "@/components/ui/toggle";
 import { TOKEN_KEY } from "@/constant/auth";
 import { useMe } from "@/composables/queries";
 
@@ -118,16 +118,29 @@ export function AppSidebar() {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            >
-              <SunIcon className="!hidden dark:!block" />
-              <MoonIcon className="dark:!hidden" />
-              <span>{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
-            </SidebarMenuButton>
+            <div className="flex items-center gap-2 px-2 py-1.5">
+              <Toggle
+                variant="outline"
+                size="sm"
+                pressed={theme === "dark"}
+                onPressedChange={(pressed) =>
+                  setTheme(pressed ? "dark" : "light")
+                }
+                aria-label="Toggle dark mode"
+              >
+                <SunIcon className="!hidden dark:!block" />
+                <MoonIcon className="dark:!hidden" />
+              </Toggle>
+              <span className="text-sm text-muted-foreground">
+                {theme === "dark" ? "Dark" : "Light"}
+              </span>
+            </div>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton onClick={handleLogout}>
+            <SidebarMenuButton
+              onClick={handleLogout}
+              className="text-red-600 bg-red-500/10 dark:bg-red-500/10 hover:text-white hover:bg-red-500 dark:text-red-400 dark:hover:text-white dark:hover:bg-red-500"
+            >
               <LogOutIcon />
               <span>Logout</span>
             </SidebarMenuButton>
