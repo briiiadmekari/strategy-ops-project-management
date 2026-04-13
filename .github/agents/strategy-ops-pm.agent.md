@@ -59,7 +59,7 @@ Use `@/` for imports from the project root:
 
 - Components: PascalCase (`ProjectCard.tsx`)
 - Hooks/composables: camelCase with `use` prefix (`useProjects.ts`)
-- Services: camelCase (`projectService.ts`)
+- Services: camelCase (`project.service.ts`)
 - Schemas: camelCase (`projectSchema.ts`)
 - Constants: camelCase (`statusOptions.ts`)
 - Pages/layouts: lowercase (`page.tsx`, `layout.tsx`)
