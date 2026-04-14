@@ -24,6 +24,8 @@ import { DeleteTaskDialog } from "@/components/DeleteTaskDialog";
 import { EyeIcon } from "lucide-react";
 import type { Task } from "@/types/task";
 
+const coreRowModel = getCoreRowModel<Task>();
+
 const columns: ColumnDef<Task>[] = [
   {
     accessorKey: "title",
@@ -89,7 +91,7 @@ export function TaskTable({ data, isLoading }: TaskTableProps) {
   const table = useReactTable({
     data,
     columns,
-    getCoreRowModel: getCoreRowModel(),
+    getCoreRowModel: coreRowModel,
   });
 
   if (isLoading) {
