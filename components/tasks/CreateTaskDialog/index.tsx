@@ -1,7 +1,10 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { PlusIcon } from "lucide-react";
+import { PlusIcon, XIcon } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 
 import { CustomDialog } from "@/components/CustomDialog";
 import { CustomInput, type SelectOption } from "@/components/CustomInput";
@@ -31,17 +34,23 @@ const priorityOptions: SelectOption[] = [
   })),
 ];
 
-export function CreateTaskDialog() {
+export function CreateTaskDialog({
+  defaultFolders,
+}: {
+  defaultFolders?: { id: string; name: string }[];
+} = {}) {
   const {
     open,
     form,
     errors,
     members,
+    folders,
     isPending,
     handleOpenChange,
     updateForm,
+    toggleFolder,
     handleSubmit,
-  } = useCreateTaskForm();
+  } = useCreateTaskForm(defaultFolders);
 
   const assigneeOptions: SelectOption[] = [
     { value: "unassigned", label: "Unassigned" },
@@ -162,6 +171,43 @@ export function CreateTaskDialog() {
         onTagsChange={(tags) => updateForm({ tags })}
         placeholder="Type a tag and press Enter"
       />
+
+      {/* Folders */}
+      {folders.length > 0 && (
+        <div className="space-y-2">
+          <Label>Folders</Label>
+          {form.folders && form.folders.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mb-2">
+              {form.folders.map((f) => (
+                <Badge key={f.id} variant="secondary" className="gap-1">
+                  {f.name}
+                  <button
+                    type="button"
+                    onClick={() => toggleFolder(f.id)}
+                    className="ml-0.5 hover:text-destructive"
+                  >
+                    <XIcon className="size-3" />
+                  </button>
+                </Badge>
+              ))}
+            </div>
+          )}
+          <div className="max-h-32 overflow-y-auto space-y-1 rounded-md border p-2">
+            {folders.map((folder) => (
+              <label
+                key={folder.id}
+                className="flex items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-accent cursor-pointer"
+              >
+                <Checkbox
+                  checked={(form.folders ?? []).some((f) => f.id === folder.id)}
+                  onCheckedChange={() => toggleFolder(folder.id)}
+                />
+                <span>{folder.name}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
     </CustomDialog>
   );
 }

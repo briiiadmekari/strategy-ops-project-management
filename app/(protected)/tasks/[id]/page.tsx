@@ -207,18 +207,33 @@ export default function TaskDetailPage({
             </div>
           </div>
 
-          {task.tags && task.tags.length > 0 && (
-            <div className="space-y-2">
-              <p className="text-sm font-medium text-muted-foreground">Tags</p>
-              <div className="flex flex-wrap gap-1.5">
-                {task.tags.map((tag) => (
-                  <Badge key={tag} variant="outline">
-                    {tag}
-                  </Badge>
-                ))}
+          <div className="grid grid-cols-6 gap-6 sm:grid-cols-12">
+            {task.tags && task.tags.length > 0 && (
+              <div className="space-y-2 col-span-2 sm:col-span-4">
+                <p className="text-sm font-medium text-muted-foreground">Tags</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {task.tags.map((tag) => (
+                    <Badge key={tag} variant="outline">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
+
+            {task.folders && task.folders.length > 0 && (
+              <div className="space-y-2 col-span-2 sm:col-span-4">
+                <p className="text-sm font-medium text-muted-foreground">Folders</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {task.folders.map((f) => (
+                    <Badge key={f.id} variant="outline">
+                      {f.name}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
 

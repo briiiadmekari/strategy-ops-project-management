@@ -6,7 +6,7 @@ import { AxiosError } from "axios";
 
 import { updateTaskSchema, type UpdateTaskInput } from "@/schema/taskSchema";
 import { useUpdateTask } from "@/composables/mutations";
-import { useMembers } from "@/composables/queries";
+import { useMembers, useFolders } from "@/composables/queries";
 import { format } from "date-fns";
 import type { Task } from "@/types/task";
 
@@ -17,10 +17,28 @@ export function useEditTaskForm(task: Task) {
 
   const updateTask = useUpdateTask();
   const { data: membersData } = useMembers();
+  const { data: foldersData } = useFolders();
   const members = membersData?.data ?? [];
+  const folders = foldersData?.data?.items ?? [];
 
   function updateForm(patch: Partial<UpdateTaskInput>) {
     setForm((prev) => ({ ...prev, ...patch }));
+  }
+
+  function toggleFolder(folderId: string) {
+    setForm((prev) => {
+      const current = prev.folders ?? [];
+      const exists = current.some((f) => f.id === folderId);
+      if (exists) {
+        return { ...prev, folders: current.filter((f) => f.id !== folderId) };
+      }
+      const folder = folders.find((f) => f.id === folderId);
+      if (!folder) return prev;
+      return {
+        ...prev,
+        folders: [...current, { id: folder.id, name: folder.name }],
+      };
+    });
   }
 
   function handleOpenChange(value: boolean) {
@@ -71,9 +89,11 @@ export function useEditTaskForm(task: Task) {
     form,
     errors,
     members,
+    folders,
     isPending: updateTask.isPending,
     handleOpenChange,
     updateForm,
+    toggleFolder,
     handleSubmit,
   };
 }
@@ -102,5 +122,6 @@ function taskToForm(task: Task): UpdateTaskInput {
     start_date: toDateString(task.start_date),
     due_date: toDateString(task.due_date),
     tags: task.tags ?? undefined,
+    folders: task.folders ?? undefined,
   };
 }

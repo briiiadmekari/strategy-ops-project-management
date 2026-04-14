@@ -1,5 +1,6 @@
 import type { TaskStatus, TaskPriority } from "@/constant/task";
 import type { PaginationParams } from "@/types/api";
+import type { FolderReference } from "@/types/folder";
 
 export interface Subtask {
   id?: string;
@@ -24,6 +25,7 @@ export interface Task {
   start_date: string | number | null;
   due_date: string | number | null;
   tags: string[] | null;
+  folders: FolderReference[] | null;
   subtasks: Subtask[] | null;
   created_at: string;
   updated_at: string;

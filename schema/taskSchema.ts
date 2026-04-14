@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { folderReferenceSchema } from "@/schema/folderSchema";
 
 const assigneeSchema = z.object({
   id: z.string(),
@@ -23,6 +24,7 @@ export const createTaskSchema = z.object({
   start_date: z.string().optional(),
   due_date: z.string().optional(),
   tags: z.array(z.string().min(1).max(50)).optional(),
+  folders: z.array(folderReferenceSchema).optional(),
 });
 
 export type CreateTaskInput = z.infer<typeof createTaskSchema>;

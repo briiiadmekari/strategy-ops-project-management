@@ -12,6 +12,7 @@ import {
   SunIcon,
   MoonIcon,
   UsersIcon,
+  FolderIcon,
 } from "lucide-react";
 
 import {
@@ -27,8 +28,10 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { Toggle } from "@/components/ui/toggle";
+import { Skeleton } from "@/components/ui/skeleton";
 import { TOKEN_KEY } from "@/constant/auth";
-import { useMe } from "@/composables/queries";
+import { useMe, useFolders } from "@/composables/queries";
+import { CreateFolderDialog } from "@/components/folders";
 
 const NAV_ITEMS = [
   { title: "Dashboard", href: "/", icon: LayoutDashboardIcon },
@@ -44,7 +47,9 @@ export function AppSidebar() {
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
   const { data: meData } = useMe();
+  const { data: foldersData, isLoading: isFoldersLoading } = useFolders();
   const isSuperadmin = meData?.data?.role === "superadmin";
+  const folders = foldersData?.data?.items ?? [];
 
   function handleLogout() {
     sessionStorage.removeItem(TOKEN_KEY);
@@ -90,6 +95,42 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <div className="flex items-center justify-between px-2">
+            <SidebarGroupLabel>Folders</SidebarGroupLabel>
+            <CreateFolderDialog />
+          </div>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {isFoldersLoading ? (
+                <div className="space-y-1 px-2">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <Skeleton key={i} className="h-8 w-full" />
+                  ))}
+                </div>
+              ) : folders.length > 0 ? (
+                folders.map((folder) => (
+                  <SidebarMenuItem key={folder.id}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname === `/folders/${folder.id}`}
+                    >
+                      <Link href={`/folders/${folder.id}`}>
+                        <FolderIcon />
+                        <span>{folder.name}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))
+              ) : (
+                <p className="px-4 py-2 text-xs text-muted-foreground">
+                  No folders yet
+                </p>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

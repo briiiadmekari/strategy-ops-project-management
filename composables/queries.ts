@@ -1,7 +1,9 @@
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { taskService } from "@/services/task.service";
+import { folderService } from "@/services/folder.service";
 import { authService } from "@/services/auth.service";
 import type { TaskFilterParams } from "@/types/task";
+import type { FolderFilterParams } from "@/types/folder";
 
 export function useMe() {
   return useQuery({
@@ -40,5 +42,30 @@ export function useTaskById(id: string) {
     queryKey: ["tasks", id],
     queryFn: () => taskService.getTaskById(id),
     enabled: !!id,
+  });
+}
+
+export function useFolders(params?: FolderFilterParams) {
+  return useQuery({
+    queryKey: ["folders", params],
+    queryFn: () => folderService.getFolders(params),
+    placeholderData: keepPreviousData,
+  });
+}
+
+export function useFolderById(id: string) {
+  return useQuery({
+    queryKey: ["folders", id],
+    queryFn: () => folderService.getFolderById(id),
+    enabled: !!id,
+  });
+}
+
+export function useFolderTasks(folderId: string, params?: TaskFilterParams) {
+  return useQuery({
+    queryKey: ["folders", folderId, "tasks", params],
+    queryFn: () => folderService.getFolderTasks(folderId, params),
+    enabled: !!folderId,
+    placeholderData: keepPreviousData,
   });
 }
