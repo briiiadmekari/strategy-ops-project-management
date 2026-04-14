@@ -29,3 +29,26 @@ export const TASK_STATUS_COLORS: Record<TaskStatus, string> = {
   CANCELED: "bg-zinc-100 text-zinc-400 line-through",
   COMPLETED: "bg-emerald-100 text-emerald-700",
 };
+
+export const TASK_PRIORITIES = [
+  "URGENT",
+  "HIGH",
+  "MEDIUM",
+  "LOW",
+] as const;
+
+export type TaskPriority = (typeof TASK_PRIORITIES)[number];
+
+export const TASK_PRIORITY_LABELS: Record<TaskPriority, string> = {
+  URGENT: "Urgent",
+  HIGH: "High",
+  MEDIUM: "Medium",
+  LOW: "Low",
+};
+
+export const TASK_PRIORITY_COLORS: Record<TaskPriority, string> = {
+  URGENT: "bg-red-100 text-red-700",
+  HIGH: "bg-orange-100 text-orange-700",
+  MEDIUM: "bg-yellow-100 text-yellow-700",
+  LOW: "bg-green-100 text-green-700",
+};

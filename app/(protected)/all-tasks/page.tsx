@@ -1,9 +1,7 @@
 "use client";
 
-import { TaskTable } from "@/components/TaskTable";
-import { TaskFilter } from "@/components/TaskFilter";
-import { TablePagination } from "@/components/TablePagination";
-import { CreateTaskDialog } from "@/components/CreateTaskDialog";
+import { TaskTable, TaskFilter, CreateTaskDialog } from "@/components/tasks";
+import { CustomTablePagination } from "@/components/CustomTablePagination";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { OctagonAlertIcon } from "lucide-react";
 import { useAllTasksPage } from "./hooks/useAllTasksPage";
@@ -41,17 +39,6 @@ export default function AllTasksPage() {
         <CreateTaskDialog />
       </div>
 
-      <TaskFilter
-        status={status}
-        onStatusChange={handleStatusChange}
-        assigneeId={assigneeId}
-        onAssigneeChange={handleAssigneeChange}
-        sortByDueDate={sortByDueDate}
-        onSortByDueDateChange={handleSortByDueDateChange}
-        members={members}
-        isMembersLoading={isMembersLoading}
-      />
-
       {isError && (
         <Alert variant="destructive">
           <OctagonAlertIcon />
@@ -61,15 +48,25 @@ export default function AllTasksPage() {
         </Alert>
       )}
 
-      <TaskTable data={tasks} isLoading={isLoading} />
-
-      <TablePagination
+      <CustomTablePagination
         page={page}
         totalPages={totalPages}
         limit={limit}
         onPageChange={setPage}
         onLimitChange={setLimit}
-      />
+      >
+        <TaskFilter
+          status={status}
+          onStatusChange={handleStatusChange}
+          assigneeId={assigneeId}
+          onAssigneeChange={handleAssigneeChange}
+          sortByDueDate={sortByDueDate}
+          onSortByDueDateChange={handleSortByDueDateChange}
+          members={members}
+          isMembersLoading={isMembersLoading}
+        />
+        <TaskTable data={tasks} isLoading={isLoading} />
+      </CustomTablePagination>
     </div>
   );
 }

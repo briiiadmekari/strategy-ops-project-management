@@ -12,23 +12,24 @@ import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 
 const LIMIT_OPTIONS = [10, 20, 30, 50] as const;
 
-interface TablePaginationProps {
+interface CustomTablePaginationProps {
   page: number;
   totalPages: number;
   limit: number;
   onPageChange: (page: number) => void;
   onLimitChange: (limit: number) => void;
+  children: React.ReactNode;
 }
 
-export function TablePagination({
+function PaginationControls({
   page,
   totalPages,
   limit,
   onPageChange,
   onLimitChange,
-}: TablePaginationProps) {
+}: Omit<CustomTablePaginationProps, "children">) {
   return (
-    <div className="flex items-center justify-between pt-4">
+    <div className="flex items-center justify-between">
       <div className="flex items-center gap-2">
         <span className="text-sm text-muted-foreground">Rows per page</span>
         <Select
@@ -76,6 +77,28 @@ export function TablePagination({
           </Button>
         </div>
       </div>
+    </div>
+  );
+}
+
+export function CustomTablePagination({
+  page,
+  totalPages,
+  limit,
+  onPageChange,
+  onLimitChange,
+  children,
+}: CustomTablePaginationProps) {
+  return (
+    <div className="space-y-4">
+      {children}
+      <PaginationControls
+        page={page}
+        totalPages={totalPages}
+        limit={limit}
+        onPageChange={onPageChange}
+        onLimitChange={onLimitChange}
+      />
     </div>
   );
 }

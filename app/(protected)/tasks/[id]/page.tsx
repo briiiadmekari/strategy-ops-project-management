@@ -13,8 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { TaskStatusBadge } from "@/components/TaskStatusBadge";
-import { DeleteTaskDialog } from "@/components/DeleteTaskDialog";
+import { TaskStatusBadge, DeleteTaskDialog } from "@/components/tasks";
 import { ArrowLeftIcon, OctagonAlertIcon } from "lucide-react";
 import { useTaskDetailPage } from "./hooks/useTaskDetailPage";
 

@@ -18,8 +18,11 @@ export const createTaskSchema = z.object({
     "CANCELED",
     "COMPLETED",
   ]).default("BACKLOG"),
+  priority: z.enum(["URGENT", "HIGH", "MEDIUM", "LOW"]).optional(),
   assignee: assigneeSchema.optional(),
+  start_date: z.string().optional(),
   due_date: z.string().optional(),
+  tags: z.array(z.string().min(1).max(50)).optional(),
 });
 
 export type CreateTaskInput = z.infer<typeof createTaskSchema>;

@@ -1,4 +1,4 @@
-import type { TaskStatus } from "@/constant/task";
+import type { TaskStatus, TaskPriority } from "@/constant/task";
 import type { PaginationParams } from "@/types/api";
 
 export interface Task {
@@ -6,10 +6,12 @@ export interface Task {
   title: string;
   description: string | null;
   status: TaskStatus;
-  priority: string | null;
+  priority: TaskPriority | null;
   assignee_id: string | null;
   assignee_name: string | null;
+  start_date: string | null;
   due_date: string | null;
+  tags: string[] | null;
   created_at: string;
   updated_at: string;
 }

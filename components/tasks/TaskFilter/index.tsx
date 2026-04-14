@@ -61,28 +61,28 @@ export function TaskFilter({
           ))}
         </SelectContent>
       </Select>
-    
-    {members.length > 0 && (
-      <Select
-        value={assigneeId ?? "all"}
-        onValueChange={(value) =>
-          onAssigneeChange(value === "all" ? undefined : value)
-        }
-        disabled={isMembersLoading}
-      >
-        <SelectTrigger className="w-[180px]" size="sm">
-          <SelectValue placeholder="All Assignees" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All Assignees</SelectItem>
-          {members.map((member) => (
-            <SelectItem key={member.id} value={member.id}>
-              {member.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    )}
+
+      {members.length > 0 && (
+        <Select
+          value={assigneeId ?? "all"}
+          onValueChange={(value) =>
+            onAssigneeChange(value === "all" ? undefined : value)
+          }
+          disabled={isMembersLoading}
+        >
+          <SelectTrigger className="w-[180px]" size="sm">
+            <SelectValue placeholder="All Assignees" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Assignees</SelectItem>
+            {members.map((member) => (
+              <SelectItem key={member.id} value={member.id}>
+                {member.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
 
       <Select
         value={sortByDueDate ?? "none"}

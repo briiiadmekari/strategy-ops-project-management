@@ -1,8 +1,5 @@
 "use client";
 
-import { toast } from "sonner";
-import { AxiosError } from "axios";
-
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { TrashIcon } from "lucide-react";
-import { useDeleteTask } from "@/composables/mutations";
+import { useDeleteTaskDialog } from "./hooks/useDeleteTaskDialog";
 
 interface DeleteTaskDialogProps {
   taskId: string;
@@ -25,29 +22,16 @@ interface DeleteTaskDialogProps {
 }
 
 export function DeleteTaskDialog({ taskId, taskTitle }: DeleteTaskDialogProps) {
-  const deleteTask = useDeleteTask();
-
-  function handleDelete() {
-    deleteTask.mutate(taskId, {
-      onSuccess: () => {
-        toast.success("Task deleted");
-      },
-      onError: (err) => {
-        if (err instanceof AxiosError) {
-          toast.error(
-            err.response?.data?.message ?? "Failed to delete task",
-          );
-        } else {
-          toast.error("An unexpected error occurred");
-        }
-      },
-    });
-  }
+  const { isPending, handleDelete } = useDeleteTaskDialog(taskId);
 
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="ghost" className="bg-red-500/10 hover:bg-red-500/20" size="sm">
+        <Button
+          variant="ghost"
+          className="bg-red-500/10 hover:bg-red-500/20"
+          size="sm"
+        >
           <TrashIcon className="text-destructive" />
         </Button>
       </AlertDialogTrigger>
@@ -63,10 +47,10 @@ export function DeleteTaskDialog({ taskId, taskTitle }: DeleteTaskDialogProps) {
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleDelete}
-            disabled={deleteTask.isPending}
+            disabled={isPending}
             className="bg-destructive/10 text-destructive hover:bg-destructive/20"
           >
-            {deleteTask.isPending ? <Spinner className="size-4" /> : "Delete"}
+            {isPending ? <Spinner className="size-4" /> : "Delete"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
