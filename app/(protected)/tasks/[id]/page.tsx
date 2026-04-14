@@ -5,17 +5,44 @@ import Link from "next/link";
 import { format } from "date-fns";
 
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { TaskStatusBadge, DeleteTaskDialog } from "@/components/tasks";
+import { DeleteTaskDialog, EditTaskDialog, SubtaskSection } from "@/components/tasks";
 import { ArrowLeftIcon, OctagonAlertIcon } from "lucide-react";
 import { useTaskDetailPage } from "./hooks/useTaskDetailPage";
+import {
+  TASK_STATUSES,
+  TASK_STATUS_LABELS,
+  TASK_STATUS_COLORS,
+  TASK_PRIORITY_LABELS,
+  TASK_PRIORITY_COLORS,
+} from "@/constant/task";
+import { cn } from "@/lib/utils";
+
+function getInitials(name: string): string {
+  return name
+    .split(" ")
+    .map((part) => part[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+}
 
 export default function TaskDetailPage({
   params,
@@ -23,7 +50,7 @@ export default function TaskDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const { task, isLoading, isError, error } = useTaskDetailPage(id);
+  const { task, isLoading, isError, error, isUpdating, handleStatusChange } = useTaskDetailPage(id);
 
   if (isLoading) {
     return <TaskDetailSkeleton />;
@@ -71,14 +98,33 @@ export default function TaskDetailPage({
             Back to tasks
           </Link>
         </Button>
-        <DeleteTaskDialog taskId={task.id} taskTitle={task.title} />
+        <div className="flex items-center gap-2">
+          <EditTaskDialog task={task} />
+          <DeleteTaskDialog taskId={task.id} taskTitle={task.title} />
+        </div>
       </div>
 
       <Card>
         <CardHeader>
           <div className="flex items-start justify-between gap-4">
             <CardTitle className="text-xl">{task.title}</CardTitle>
-            <TaskStatusBadge status={task.status} />
+            <Select
+              value={task.status}
+              onValueChange={handleStatusChange}
+              disabled={isUpdating}
+            >
+              <SelectTrigger className={cn("h-8 w-auto text-xs gap-1 font-medium", TASK_STATUS_COLORS[task.status])}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {TASK_STATUSES.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    <span className={cn("inline-block size-2 rounded-full mr-1.5", TASK_STATUS_COLORS[s].split(" ")[0])} />
+                    {TASK_STATUS_LABELS[s]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -96,14 +142,48 @@ export default function TaskDetailPage({
               <p className="text-sm font-medium text-muted-foreground">
                 Assignee
               </p>
-              <p className="text-sm">{task.assignee_name ?? "Unassigned"}</p>
+              {task.assignee_name ? (
+                <div className="flex items-center gap-2">
+                  <Avatar size="sm">
+                    <AvatarFallback>
+                      {getInitials(task.assignee_name)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <p className="text-sm">{task.assignee_name}</p>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">Unassigned</p>
+              )}
             </div>
 
             <div className="space-y-1">
               <p className="text-sm font-medium text-muted-foreground">
                 Priority
               </p>
-              <p className="text-sm">{task.priority ?? "—"}</p>
+              {task.priority ? (
+                <Badge
+                  variant="secondary"
+                  className={cn(
+                    "text-xs",
+                    TASK_PRIORITY_COLORS[task.priority],
+                  )}
+                >
+                  {TASK_PRIORITY_LABELS[task.priority]}
+                </Badge>
+              ) : (
+                <p className="text-sm text-muted-foreground">—</p>
+              )}
+            </div>
+
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-muted-foreground">
+                Start Date
+              </p>
+              <p className="text-sm">
+                {task.start_date
+                  ? format(new Date(task.start_date), "MMM d, yyyy")
+                  : "—"}
+              </p>
             </div>
 
             <div className="space-y-1">
@@ -126,8 +206,23 @@ export default function TaskDetailPage({
               </p>
             </div>
           </div>
+
+          {task.tags && task.tags.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-muted-foreground">Tags</p>
+              <div className="flex flex-wrap gap-1.5">
+                {task.tags.map((tag) => (
+                  <Badge key={tag} variant="outline">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
+
+      <SubtaskSection task={task} />
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import api from "@/services/axios";
 import type { ApiResponse, PaginatedResponse } from "@/types/api";
 import type { Task, TaskFilterParams } from "@/types/task";
-import type { CreateTaskInput } from "@/schema/taskSchema";
+import type { CreateTaskInput, UpdateTaskInput } from "@/schema/taskSchema";
 
 export const taskService = {
   /**
@@ -127,6 +127,28 @@ export const taskService = {
   createTask: (payload: CreateTaskInput) =>
     api
       .post<ApiResponse<Task>>("/tasks/create", payload)
+      .then((res) => res.data),
+
+  /**
+   * POST /tasks/update?id=:id
+   *
+   * Updates a task by ID.
+   *
+   * Request body: Partial task fields (title, description, status, priority,
+   * assignee, start_date, due_date, tags, subtasks, etc.)
+   *
+   * Expected response:
+   * {
+   *   error: false,
+   *   message: "Task updated successfully",
+   *   data: Task
+   * }
+   */
+  updateTask: (id: string, payload: UpdateTaskInput) =>
+    api
+      .post<ApiResponse<Task>>(`/tasks/update`, payload, {
+        params: { id },
+      })
       .then((res) => res.data),
 
   /**

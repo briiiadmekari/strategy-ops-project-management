@@ -1,10 +1,13 @@
 "use client";
 
+import { Fragment } from "react";
 import {
   useReactTable,
   getCoreRowModel,
+  getExpandedRowModel,
   flexRender,
   type ColumnDef,
+  type Row,
 } from "@tanstack/react-table";
 
 import {
@@ -33,6 +36,8 @@ interface CustomTableProps<TData> {
   data: TData[];
   isLoading?: boolean;
   emptyMessage?: string;
+  getRowCanExpand?: (row: Row<TData>) => boolean;
+  renderSubRow?: (row: Row<TData>) => React.ReactNode;
 }
 
 export function CustomTable<TData>({
@@ -40,11 +45,15 @@ export function CustomTable<TData>({
   data,
   isLoading,
   emptyMessage = "No data found.",
+  getRowCanExpand,
+  renderSubRow,
 }: CustomTableProps<TData>) {
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    getExpandedRowModel: getExpandedRowModel(),
+    getRowCanExpand,
   });
 
   if (isLoading) {
@@ -72,13 +81,16 @@ export function CustomTable<TData>({
       <TableBody>
         {table.getRowModel().rows.length ? (
           table.getRowModel().rows.map((row) => (
-            <TableRow key={row.id}>
-              {row.getVisibleCells().map((cell) => (
-                <TableCell key={cell.id}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </TableCell>
-              ))}
-            </TableRow>
+            <Fragment key={row.id}>
+              <TableRow>
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+              {row.getIsExpanded() && renderSubRow && renderSubRow(row)}
+            </Fragment>
           ))
         ) : (
           <TableRow>

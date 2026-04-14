@@ -2,11 +2,11 @@
 
 import { useState, useRef, useEffect } from "react";
 import { format, parse } from "date-fns";
+import { type Tag, TagInput as EmblrTagInput } from "emblor";
 
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CalendarIcon, XIcon } from "lucide-react";
+import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // ── Shared ──────────────────────────────────────────────
@@ -136,7 +136,7 @@ function SelectInput({
 
 interface DateInputProps extends BaseProps {
   type: "date";
-  value?: string;
+  value?: string | number;
   onDateChange: (val: string | undefined) => void;
 }
 
@@ -163,9 +163,16 @@ function DateInput({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const selectedDate = value
-    ? parse(value, "yyyy-MM-dd", new Date())
-    : undefined;
+  const selectedDate = (() => {
+    if (!value) return undefined;
+    if (typeof value === "number") return new Date(value);
+    if (typeof value === "string") {
+      // Try yyyy-MM-dd first, fallback to direct Date parse for ISO/timestamps
+      const parsed = parse(value, "yyyy-MM-dd", new Date());
+      return isNaN(parsed.getTime()) ? new Date(value) : parsed;
+    }
+    return undefined;
+  })();
 
   return (
     <div ref={containerRef} className={cn("relative space-y-2", className)}>
@@ -180,7 +187,9 @@ function DateInput({
         onClick={() => setOpen((prev) => !prev)}
       >
         <CalendarIcon className="size-4" />
-        {value ? format(selectedDate!, "dd/MM/yyyy") : "Pick a date"}
+        {selectedDate && !isNaN(selectedDate.getTime())
+          ? format(selectedDate, "dd/MM/yyyy")
+          : "Pick a date"}
       </Button>
       {open && (
         <div className="absolute z-50 mt-1 rounded-md border bg-popover shadow-md">
@@ -219,65 +228,28 @@ function TagsInput({
   placeholder = "Type and press Enter",
   maxTags = 10,
 }: TagsInputProps) {
-  const [input, setInput] = useState("");
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
 
-  function addTag(tag: string) {
-    const trimmed = tag.trim();
-    if (!trimmed || value.includes(trimmed) || value.length >= maxTags) return;
-    onTagsChange([...value, trimmed]);
-    setInput("");
-  }
+  const tags: Tag[] = value.map((text) => ({ id: text, text }));
 
-  function removeTag(index: number) {
-    onTagsChange(value.filter((_, i) => i !== index));
-  }
-
-  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      addTag(input);
-    } else if (e.key === "Backspace" && !input && value.length > 0) {
-      removeTag(value.length - 1);
-    }
+  function handleSetTags(
+    newTags: Tag[] | ((prev: Tag[]) => Tag[]),
+  ) {
+    const resolved = typeof newTags === "function" ? newTags(tags) : newTags;
+    onTagsChange(resolved.map((t) => t.text));
   }
 
   return (
     <div className={cn("space-y-2", className)}>
       {label && <Label>{label}</Label>}
-      <div
-        className="flex flex-wrap gap-1.5 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 cursor-text"
-        onClick={() => inputRef.current?.focus()}
-      >
-        {value.map((tag, i) => (
-          <Badge key={i} variant="secondary" className="gap-1 pr-1">
-            {tag}
-            <button
-              type="button"
-              className="rounded-full hover:bg-muted-foreground/20 p-0.5 cursor-pointer"
-              onClick={(e) => {
-                e.stopPropagation();
-                removeTag(i);
-              }}
-            >
-              <XIcon className="size-3" />
-            </button>
-          </Badge>
-        ))}
-        <Input
-          ref={inputRef}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder={value.length === 0 ? placeholder : ""}
-          className="h-auto min-w-20 flex-1 border-0 p-0 shadow-none focus-visible:ring-0"
-        />
-      </div>
-      {value.length >= maxTags && (
-        <p className="text-xs text-muted-foreground">
-          Maximum of {maxTags} tags reached.
-        </p>
-      )}
+      <EmblrTagInput
+        tags={tags}
+        setTags={handleSetTags}
+        placeholder={placeholder}
+        maxTags={maxTags}
+        activeTagIndex={activeTagIndex}
+        setActiveTagIndex={setActiveTagIndex}
+      />
       {error && <p className="text-xs text-destructive">{error}</p>}
     </div>
   );

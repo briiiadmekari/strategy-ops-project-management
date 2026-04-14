@@ -3,6 +3,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { UserProfile } from "@/components/UserProfile";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 export default function ProtectedLayout({
   children,
@@ -11,6 +12,7 @@ export default function ProtectedLayout({
 }) {
   return (
     <AuthGuard>
+      <TooltipProvider>
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>
@@ -24,6 +26,7 @@ export default function ProtectedLayout({
           <main className="flex-1 p-4 md:p-6">{children}</main>
         </SidebarInset>
       </SidebarProvider>
+      </TooltipProvider>
     </AuthGuard>
   );
 }
