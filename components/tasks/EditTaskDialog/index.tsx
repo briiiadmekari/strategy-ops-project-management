@@ -13,6 +13,8 @@ import {
   TASK_PRIORITIES,
   TASK_PRIORITY_LABELS,
   TASK_PRIORITY_COLORS,
+  TASK_TAGS,
+  TASK_TAG_COLORS,
 } from "@/constant/task";
 import type { UpdateTaskInput } from "@/schema/taskSchema";
 import type { Task } from "@/types/task";
@@ -165,13 +167,34 @@ export function EditTaskDialog({ task }: EditTaskDialogProps) {
       </div>
 
       {/* Tags */}
-      <CustomInput
-        type="tags"
-        label="Tags"
-        value={form.tags ?? []}
-        onTagsChange={(tags) => updateForm({ tags })}
-        placeholder="Type a tag and press Enter"
-      />
+      <div className="space-y-2">
+        <Label>Tags</Label>
+        <div className="flex flex-wrap gap-1.5">
+          {TASK_TAGS.map((tag) => {
+            const isSelected = (form.tags ?? []).includes(tag);
+            return (
+              <Badge
+                key={tag}
+                variant={isSelected ? "default" : "outline"}
+                className={cn(
+                  "cursor-pointer capitalize",
+                  isSelected && TASK_TAG_COLORS[tag],
+                )}
+                onClick={() => {
+                  const current = form.tags ?? [];
+                  updateForm({
+                    tags: isSelected
+                      ? current.filter((t) => t !== tag)
+                      : [...current, tag],
+                  });
+                }}
+              >
+                {tag}
+              </Badge>
+            );
+          })}
+        </div>
+      </div>
 
       {/* Folders */}
       {folders.length > 0 && (

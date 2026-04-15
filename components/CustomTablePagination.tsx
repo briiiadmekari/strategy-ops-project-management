@@ -31,7 +31,7 @@ function PaginationControls({
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-2">
-        <span className="text-sm text-muted-foreground">Rows per page</span>
+        <span className="text-xs text-muted-foreground">Rows per page</span>
         <Select
           value={String(limit)}
           onValueChange={(value) => {
@@ -39,12 +39,12 @@ function PaginationControls({
             onPageChange(1);
           }}
         >
-          <SelectTrigger className="w-[70px]" size="sm">
-            <SelectValue />
+          <SelectTrigger className="w-[70px] !text-xs">
+            <SelectValue  />
           </SelectTrigger>
           <SelectContent>
             {LIMIT_OPTIONS.map((opt) => (
-              <SelectItem key={opt} value={String(opt)}>
+              <SelectItem key={opt} value={String(opt)} className="text-xs">
                 {opt}
               </SelectItem>
             ))}
@@ -53,7 +53,7 @@ function PaginationControls({
       </div>
 
       <div className="flex items-center gap-4">
-        <p className="text-sm text-muted-foreground">
+        <p className="text-xs text-muted-foreground">
           Page {page} of {totalPages || 1}
         </p>
         <div className="flex gap-2">
@@ -62,6 +62,7 @@ function PaginationControls({
             size="sm"
             disabled={page <= 1}
             onClick={() => onPageChange(page - 1)}
+            className="!text-xs"
           >
             <ChevronLeftIcon />
             Previous
@@ -71,6 +72,7 @@ function PaginationControls({
             size="sm"
             disabled={page >= totalPages}
             onClick={() => onPageChange(page + 1)}
+            className="!text-xs"
           >
             Next
             <ChevronRightIcon />

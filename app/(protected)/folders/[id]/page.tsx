@@ -1,10 +1,11 @@
 "use client";
 
-import { use } from "react";
+import { use, useState } from "react";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
@@ -31,14 +32,15 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { TaskTable, TaskFilter, CreateTaskDialog } from "@/components/tasks";
-import { CustomTablePagination } from "@/components/CustomTablePagination";
+import { GroupedTaskTable, TaskFilter, CreateTaskDialog } from "@/components/tasks";
 import {
   ArrowLeftIcon,
   OctagonAlertIcon,
   TrashIcon,
   UserPlusIcon,
   XIcon,
+  PencilIcon,
+  CheckIcon,
 } from "lucide-react";
 import { useFolderPage } from "./hooks/useFolderPage";
 
@@ -51,20 +53,18 @@ export default function FolderDetailPage({
   const {
     folder,
     tasks,
-    totalPages,
     members,
     isCreator,
-    page,
-    limit,
-    setPage,
-    setLimit,
     status,
     sortByDueDate,
+    selectedTag,
     handleStatusChange,
     handleSortByDueDateChange,
+    handleTagChange,
     handleAddMember,
     handleRemoveMember,
     handleDeleteFolder,
+    handleRenameFolder,
     isLoading,
     isTasksLoading,
     isError,
@@ -132,9 +132,11 @@ export default function FolderDetailPage({
               Back
             </Link>
           </Button>
-          <h1 className="text-2xl font-semibold tracking-tight">
-            {folder.name}
-          </h1>
+          <FolderNameEditor
+            name={folder.name}
+            isCreator={isCreator}
+            onRename={handleRenameFolder}
+          />
         </div>
         <div className="flex items-center gap-2">
           <CreateTaskDialog defaultFolders={[{ id: folder.id, name: folder.name }]} />
@@ -212,13 +214,7 @@ export default function FolderDetailPage({
       </Card>
 
       {/* Tasks Table */}
-      <CustomTablePagination
-        page={page}
-        totalPages={totalPages}
-        limit={limit}
-        onPageChange={setPage}
-        onLimitChange={setLimit}
-      >
+      <div className="space-y-4">
         <TaskFilter
           status={status}
           onStatusChange={handleStatusChange}
@@ -226,11 +222,91 @@ export default function FolderDetailPage({
           onAssigneeChange={() => {}}
           sortByDueDate={sortByDueDate}
           onSortByDueDateChange={handleSortByDueDateChange}
+          selectedTag={selectedTag}
+          onTagChange={handleTagChange}
           members={[]}
           isMembersLoading={false}
         />
-        <TaskTable data={tasks} isLoading={isTasksLoading} />
-      </CustomTablePagination>
+        <GroupedTaskTable data={tasks} isLoading={isTasksLoading} />
+      </div>
+    </div>
+  );
+}
+
+function FolderNameEditor({
+  name,
+  isCreator,
+  onRename,
+}: {
+  name: string;
+  isCreator: boolean;
+  onRename: (newName: string) => void;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState(name);
+
+  if (!isCreator) {
+    return (
+      <h1 className="text-2xl font-semibold tracking-tight">{name}</h1>
+    );
+  }
+
+  if (editing) {
+    return (
+      <div className="flex items-center gap-2">
+        <Input
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          className="text-2xl font-semibold h-10 w-64"
+          autoFocus
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              onRename(value);
+              setEditing(false);
+            }
+            if (e.key === "Escape") {
+              setValue(name);
+              setEditing(false);
+            }
+          }}
+        />
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          onClick={() => {
+            onRename(value);
+            setEditing(false);
+          }}
+        >
+          <CheckIcon className="size-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          onClick={() => {
+            setValue(name);
+            setEditing(false);
+          }}
+        >
+          <XIcon className="size-4" />
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      <h1 className="text-2xl font-semibold tracking-tight">{name}</h1>
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        onClick={() => {
+          setValue(name);
+          setEditing(true);
+        }}
+      >
+        <PencilIcon className="size-4" />
+      </Button>
     </div>
   );
 }

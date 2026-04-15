@@ -1,66 +1,68 @@
 import { useMemo, useState } from "react";
-import { useAllTasks, useMembers } from "@/composables/queries";
-import type { TaskStatus } from "@/constant/task";
+import { useTaskLogs, useMembers } from "@/composables/queries";
 
-export function useAllTasksPage() {
-  const [status, setStatus] = useState<TaskStatus | undefined>();
+export function useLogsPage() {
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
   const [assigneeId, setAssigneeId] = useState<string | undefined>();
   const [sortByDueDate, setSortByDueDate] = useState<
     "asc" | "desc" | undefined
   >();
   const [selectedTag, setSelectedTag] = useState<string | undefined>();
 
-  const tasksQuery = useAllTasks({
-    page: 1,
-    limit: 1000,
-    status,
+  const logsQuery = useTaskLogs({
+    page,
+    limit,
     assignee_id: assigneeId,
     sort_by_due_date: sortByDueDate,
   });
 
   const membersQuery = useMembers();
 
-  const allTasks = tasksQuery.data?.data?.items ?? [];
+  const allLogs = logsQuery.data?.data?.items ?? [];
+  const totalPages = logsQuery.data?.data?.total_pages ?? 1;
   const members = membersQuery.data?.data ?? [];
 
-  const tasks = useMemo(
+  const logs = useMemo(
     () =>
       selectedTag
-        ? allTasks.filter((t) => t.tags?.includes(selectedTag))
-        : allTasks,
-    [allTasks, selectedTag],
+        ? allLogs.filter((l) => l.tags?.includes(selectedTag))
+        : allLogs,
+    [allLogs, selectedTag],
   );
-
-  function handleStatusChange(value: TaskStatus | undefined) {
-    setStatus(value);
-  }
 
   function handleAssigneeChange(value: string | undefined) {
     setAssigneeId(value);
+    setPage(1);
   }
 
   function handleSortByDueDateChange(value: "asc" | "desc" | undefined) {
     setSortByDueDate(value);
+    setPage(1);
   }
 
   function handleTagChange(value: string | undefined) {
     setSelectedTag(value);
+    setPage(1);
   }
 
   return {
-    tasks,
+    logs,
     members,
-    status,
+    page,
+    limit,
+    totalPages,
+    setPage,
+    setLimit,
     assigneeId,
     sortByDueDate,
     selectedTag,
-    handleStatusChange,
     handleAssigneeChange,
     handleSortByDueDateChange,
     handleTagChange,
-    isLoading: tasksQuery.isLoading,
-    isError: tasksQuery.isError,
-    error: tasksQuery.error,
+    isLoading: logsQuery.isLoading,
+    isError: logsQuery.isError,
+    error: logsQuery.error,
     isMembersLoading: membersQuery.isLoading,
   };
 }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useFolderById, useFolderTasks, useMembers } from "@/composables/queries";
 import { useUpdateFolder, useDeleteFolder } from "@/composables/mutations";
 import { useMe } from "@/composables/queries";
@@ -9,15 +9,14 @@ import type { TaskStatus } from "@/constant/task";
 
 export function useFolderPage(id: string) {
   const router = useRouter();
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
   const [status, setStatus] = useState<TaskStatus | undefined>();
   const [sortByDueDate, setSortByDueDate] = useState<"asc" | "desc" | undefined>();
+  const [selectedTag, setSelectedTag] = useState<string | undefined>();
 
   const folderQuery = useFolderById(id);
   const tasksQuery = useFolderTasks(id, {
-    page,
-    limit,
+    page: 1,
+    limit: 1000,
     status,
     sort_by_due_date: sortByDueDate,
   });
@@ -27,19 +26,28 @@ export function useFolderPage(id: string) {
   const deleteFolder = useDeleteFolder();
 
   const folder = folderQuery.data?.data ?? null;
-  const tasks = tasksQuery.data?.data?.items ?? [];
-  const totalPages = tasksQuery.data?.data?.total_pages ?? 1;
+  const allTasks = tasksQuery.data?.data?.items ?? [];
+
+  const tasks = useMemo(
+    () =>
+      selectedTag
+        ? allTasks.filter((t) => t.tags?.includes(selectedTag))
+        : allTasks,
+    [allTasks, selectedTag],
+  );
   const members = membersData?.data ?? [];
   const isCreator = folder?.creator?.id === meData?.data?.id;
 
   function handleStatusChange(value: TaskStatus | undefined) {
     setStatus(value);
-    setPage(1);
   }
 
   function handleSortByDueDateChange(value: "asc" | "desc" | undefined) {
     setSortByDueDate(value);
-    setPage(1);
+  }
+
+  function handleTagChange(value: string | undefined) {
+    setSelectedTag(value);
   }
 
   function handleAddMember(memberId: string) {
@@ -105,23 +113,40 @@ export function useFolderPage(id: string) {
     });
   }
 
+  function handleRenameFolder(newName: string) {
+    if (!folder || !newName.trim()) return;
+    updateFolder.mutate(
+      { id: folder.id, payload: { name: newName.trim() } },
+      {
+        onSuccess: () => {
+          toast.success("Folder renamed");
+        },
+        onError: (err) => {
+          if (err instanceof AxiosError) {
+            toast.error(err.response?.data?.message ?? "Failed to rename folder");
+          } else {
+            toast.error("An unexpected error occurred");
+          }
+        },
+      },
+    );
+  }
+
   return {
     folder,
     tasks,
-    totalPages,
     members,
     isCreator,
-    page,
-    limit,
-    setPage,
-    setLimit,
     status,
     sortByDueDate,
+    selectedTag,
     handleStatusChange,
     handleSortByDueDateChange,
+    handleTagChange,
     handleAddMember,
     handleRemoveMember,
     handleDeleteFolder,
+    handleRenameFolder,
     isLoading: folderQuery.isLoading,
     isTasksLoading: tasksQuery.isLoading,
     isError: folderQuery.isError,

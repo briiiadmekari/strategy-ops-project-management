@@ -33,6 +33,8 @@ const INITIAL_FORM: SubtaskInput = {
 
 export function useSubtasks(task: Task) {
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editIndex, setEditIndex] = useState<number | null>(null);
   const [form, setForm] = useState<SubtaskInput>({ ...INITIAL_FORM });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -52,6 +54,22 @@ export function useSubtasks(task: Task) {
   function handleDialogOpenChange(value: boolean) {
     setDialogOpen(value);
     if (!value) resetForm();
+  }
+
+  function handleEditOpen(index: number) {
+    const subtask = subtasks[index];
+    setEditIndex(index);
+    setForm(subtaskToInput(subtask));
+    setErrors({});
+    setEditDialogOpen(true);
+  }
+
+  function handleEditDialogOpenChange(value: boolean) {
+    setEditDialogOpen(value);
+    if (!value) {
+      setEditIndex(null);
+      resetForm();
+    }
   }
 
   function handleAddSubmit(e: React.FormEvent) {
@@ -141,15 +159,61 @@ export function useSubtasks(task: Task) {
     );
   }
 
+  function handleEditSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (editIndex === null) return;
+    setErrors({});
+
+    const result = subtaskSchema.safeParse(form);
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {};
+      for (const issue of result.error.issues) {
+        const key = issue.path[0];
+        if (key) fieldErrors[String(key)] = issue.message;
+      }
+      setErrors(fieldErrors);
+      return;
+    }
+
+    const updated = subtasks.map((st, i) =>
+      i === editIndex ? { ...st, ...result.data } : st,
+    );
+
+    updateTask.mutate(
+      { id: task.id, payload: { subtasks: updated.map(subtaskToInput) } },
+      {
+        onSuccess: () => {
+          toast.success("Subtask updated");
+          setEditDialogOpen(false);
+          setEditIndex(null);
+          resetForm();
+        },
+        onError: (err) => {
+          if (err instanceof AxiosError) {
+            toast.error(
+              err.response?.data?.message ?? "Failed to update subtask",
+            );
+          } else {
+            toast.error("An unexpected error occurred");
+          }
+        },
+      },
+    );
+  }
+
   return {
     subtasks,
     dialogOpen,
+    editDialogOpen,
     form,
     errors,
     isPending: updateTask.isPending,
     handleDialogOpenChange,
+    handleEditOpen,
+    handleEditDialogOpenChange,
     updateForm,
     handleAddSubmit,
+    handleEditSubmit,
     handleSubtaskStatusChange,
     handleDelete,
   };

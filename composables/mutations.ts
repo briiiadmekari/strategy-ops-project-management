@@ -11,6 +11,7 @@ export function useCreateTask() {
     mutationFn: (payload: CreateTaskInput) => taskService.createTask(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["folders"] });
     },
   });
 }
@@ -24,6 +25,7 @@ export function useUpdateTask() {
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       queryClient.invalidateQueries({ queryKey: ["tasks", variables.id] });
+      queryClient.invalidateQueries({ queryKey: ["folders"] });
     },
   });
 }

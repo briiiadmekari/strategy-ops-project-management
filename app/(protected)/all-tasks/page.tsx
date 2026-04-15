@@ -1,7 +1,6 @@
 "use client";
 
-import { TaskTable, TaskFilter, CreateTaskDialog } from "@/components/tasks";
-import { CustomTablePagination } from "@/components/CustomTablePagination";
+import { GroupedTaskTable, TaskFilter, CreateTaskDialog } from "@/components/tasks";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { OctagonAlertIcon } from "lucide-react";
 import { useAllTasksPage } from "./hooks/useAllTasksPage";
@@ -9,18 +8,15 @@ import { useAllTasksPage } from "./hooks/useAllTasksPage";
 export default function AllTasksPage() {
   const {
     tasks,
-    totalPages,
     members,
-    page,
-    limit,
-    setPage,
-    setLimit,
     status,
     assigneeId,
     sortByDueDate,
+    selectedTag,
     handleStatusChange,
     handleAssigneeChange,
     handleSortByDueDateChange,
+    handleTagChange,
     isLoading,
     isError,
     error,
@@ -48,25 +44,19 @@ export default function AllTasksPage() {
         </Alert>
       )}
 
-      <CustomTablePagination
-        page={page}
-        totalPages={totalPages}
-        limit={limit}
-        onPageChange={setPage}
-        onLimitChange={setLimit}
-      >
-        <TaskFilter
-          status={status}
-          onStatusChange={handleStatusChange}
-          assigneeId={assigneeId}
-          onAssigneeChange={handleAssigneeChange}
-          sortByDueDate={sortByDueDate}
-          onSortByDueDateChange={handleSortByDueDateChange}
-          members={members}
-          isMembersLoading={isMembersLoading}
-        />
-        <TaskTable data={tasks} isLoading={isLoading} />
-      </CustomTablePagination>
+      <TaskFilter
+        status={status}
+        onStatusChange={handleStatusChange}
+        assigneeId={assigneeId}
+        onAssigneeChange={handleAssigneeChange}
+        sortByDueDate={sortByDueDate}
+        onSortByDueDateChange={handleSortByDueDateChange}
+        selectedTag={selectedTag}
+        onTagChange={handleTagChange}
+        members={members}
+        isMembersLoading={isMembersLoading}
+      />
+      <GroupedTaskTable data={tasks} isLoading={isLoading} />
     </div>
   );
 }

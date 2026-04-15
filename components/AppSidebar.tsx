@@ -13,6 +13,7 @@ import {
   MoonIcon,
   UsersIcon,
   FolderIcon,
+  ScrollTextIcon,
 } from "lucide-react";
 
 import {
@@ -37,6 +38,7 @@ const NAV_ITEMS = [
   { title: "Dashboard", href: "/", icon: LayoutDashboardIcon },
   { title: "My Tasks", href: "/my-tasks", icon: ClipboardListIcon },
   { title: "All Tasks", href: "/all-tasks", icon: ListChecksIcon },
+  { title: "Logs", href: "/logs", icon: ScrollTextIcon },
 ];
 
 const ADMIN_ITEMS = [

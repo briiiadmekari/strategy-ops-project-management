@@ -50,7 +50,7 @@ export function CustomDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent
-        className={cn("sm:max-w-lg max-h-[85vh] overflow-y-auto", className)}
+        className={cn("sm:max-w-lg max-h-[85vh] overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]", className)}
       >
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
@@ -60,7 +60,7 @@ export function CustomDialog({
         </DialogHeader>
 
         {onSubmit ? (
-          <form onSubmit={onSubmit} className="space-y-4">
+          <form onSubmit={onSubmit} className="space-y-4 overflow-hidden">
             {children}
             {footer ?? (
               <DialogFooter>

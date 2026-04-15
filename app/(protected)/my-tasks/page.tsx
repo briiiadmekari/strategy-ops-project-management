@@ -1,7 +1,6 @@
 "use client";
 
-import { TaskTable, TaskFilter, CreateTaskDialog } from "@/components/tasks";
-import { CustomTablePagination } from "@/components/CustomTablePagination";
+import { GroupedTaskTable, TaskFilter, CreateTaskDialog } from "@/components/tasks";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { OctagonAlertIcon } from "lucide-react";
 import { useMyTasksPage } from "./hooks/useMyTasksPage";
@@ -9,17 +8,14 @@ import { useMyTasksPage } from "./hooks/useMyTasksPage";
 export default function MyTasksPage() {
   const {
     tasks,
-    totalPages,
-    page,
-    limit,
-    setPage,
-    setLimit,
     status,
     assigneeId,
     sortByDueDate,
+    selectedTag,
     handleStatusChange,
     handleAssigneeChange,
     handleSortByDueDateChange,
+    handleTagChange,
     isLoading,
     isError,
     error
@@ -46,25 +42,19 @@ export default function MyTasksPage() {
         </Alert>
       )}
 
-      <CustomTablePagination
-        page={page}
-        totalPages={totalPages}
-        limit={limit}
-        onPageChange={setPage}
-        onLimitChange={setLimit}
-      >
-        <TaskFilter
-          status={status}
-          onStatusChange={handleStatusChange}
-          assigneeId={assigneeId}
-          onAssigneeChange={handleAssigneeChange}
-          sortByDueDate={sortByDueDate}
-          onSortByDueDateChange={handleSortByDueDateChange}
-          members={[]}
-          isMembersLoading={false}
-        />
-        <TaskTable data={tasks} isLoading={isLoading} />
-      </CustomTablePagination>
+      <TaskFilter
+        status={status}
+        onStatusChange={handleStatusChange}
+        assigneeId={assigneeId}
+        onAssigneeChange={handleAssigneeChange}
+        sortByDueDate={sortByDueDate}
+        onSortByDueDateChange={handleSortByDueDateChange}
+        selectedTag={selectedTag}
+        onTagChange={handleTagChange}
+        members={[]}
+        isMembersLoading={false}
+      />
+      <GroupedTaskTable data={tasks} isLoading={isLoading} />
     </div>
   );
 }

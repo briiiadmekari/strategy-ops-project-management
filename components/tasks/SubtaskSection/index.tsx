@@ -24,7 +24,7 @@ import {
   TASK_PRIORITY_COLORS,
 } from "@/constant/task";
 import type { SubtaskInput } from "@/schema/taskSchema";
-import { PlusIcon, TrashIcon } from "lucide-react";
+import { PlusIcon, TrashIcon, PencilIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import type { Task, Subtask } from "@/types/task";
@@ -54,12 +54,16 @@ export function SubtaskSection({ task }: SubtaskSectionProps) {
   const {
     subtasks,
     dialogOpen,
+    editDialogOpen,
     form,
     errors,
     isPending,
     handleDialogOpenChange,
+    handleEditOpen,
+    handleEditDialogOpenChange,
     updateForm,
     handleAddSubmit,
+    handleEditSubmit,
     handleSubtaskStatusChange,
     handleDelete,
   } = useSubtasks(task);
@@ -89,19 +93,31 @@ export function SubtaskSection({ task }: SubtaskSectionProps) {
                       index={index}
                       isPending={isPending}
                       onStatusChange={handleSubtaskStatusChange}
+                      onEdit={handleEditOpen}
                       onDelete={handleDelete}
                     />
                   ))}
                 </div>
-                <AddSubtaskDialog
-                  open={dialogOpen}
-                  onOpenChange={handleDialogOpenChange}
-                  form={form}
-                  errors={errors}
-                  isPending={isPending}
-                  updateForm={updateForm}
-                  onSubmit={handleAddSubmit}
-                />
+                <div className="flex items-center gap-2">
+                  <AddSubtaskDialog
+                    open={dialogOpen}
+                    onOpenChange={handleDialogOpenChange}
+                    form={form}
+                    errors={errors}
+                    isPending={isPending}
+                    updateForm={updateForm}
+                    onSubmit={handleAddSubmit}
+                  />
+                  <EditSubtaskDialog
+                    open={editDialogOpen}
+                    onOpenChange={handleEditDialogOpenChange}
+                    form={form}
+                    errors={errors}
+                    isPending={isPending}
+                    updateForm={updateForm}
+                    onSubmit={handleEditSubmit}
+                  />
+                </div>
               </>
             ) : (
               <div className="flex flex-col items-center justify-center py-8">
@@ -140,23 +156,35 @@ interface SubtaskCardProps {
   index: number;
   isPending: boolean;
   onStatusChange: (index: number, status: string) => void;
+  onEdit: (index: number) => void;
   onDelete: (index: number) => void;
 }
 
-function SubtaskCard({ subtask, index, isPending, onStatusChange, onDelete }: SubtaskCardProps) {
+function SubtaskCard({ subtask, index, isPending, onStatusChange, onEdit, onDelete }: SubtaskCardProps) {
   return (
     <div className="rounded-md border p-3 space-y-2">
       <div className="flex items-start justify-between gap-2">
         <p className="text-sm font-medium">{subtask.title}</p>
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          onClick={() => onDelete(index)}
-          disabled={isPending}
-          className="shrink-0 text-muted-foreground hover:text-destructive"
-        >
-          <TrashIcon className="size-4" />
-        </Button>
+        <div className="flex items-center gap-0.5 shrink-0">
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={() => onEdit(index)}
+            disabled={isPending}
+            className="text-muted-foreground hover:text-primary"
+          >
+            <PencilIcon className="size-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={() => onDelete(index)}
+            disabled={isPending}
+            className="text-muted-foreground hover:text-destructive"
+          >
+            <TrashIcon className="size-4" />
+          </Button>
+        </div>
       </div>
 
       {subtask.description && (
@@ -233,6 +261,98 @@ function AddSubtaskDialog({
       description="Fill in the details for the subtask."
       onSubmit={onSubmit}
       submitLabel="Add"
+      isPending={isPending}
+      onCancel={() => onOpenChange(false)}
+    >
+      <CustomInput
+        label="Title"
+        value={form.title}
+        onChange={(e) => updateForm({ title: e.target.value })}
+        placeholder="Enter subtask title"
+        error={errors.title}
+      />
+
+      <CustomInput
+        type="textarea"
+        label="Description"
+        value={form.description ?? ""}
+        onChange={(e) => updateForm({ description: e.target.value })}
+        placeholder="Enter description (optional)"
+      />
+
+      <div className="grid grid-cols-2 gap-4">
+        <CustomInput
+          type="select"
+          label="Status"
+          value={form.status}
+          onValueChange={(value) =>
+            updateForm({ status: value as SubtaskInput["status"] })
+          }
+          options={statusOptions}
+        />
+
+        <CustomInput
+          type="select"
+          label="Priority"
+          value={form.priority ?? "none"}
+          onValueChange={(value) =>
+            updateForm({
+              priority:
+                value === "none"
+                  ? undefined
+                  : (value as SubtaskInput["priority"]),
+            })
+          }
+          options={priorityOptions}
+          placeholder="None"
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <CustomInput
+          type="date"
+          label="Start Date"
+          value={form.start_date}
+          onDateChange={(val) => updateForm({ start_date: val })}
+        />
+        <CustomInput
+          type="date"
+          label="Due Date"
+          value={form.due_date}
+          onDateChange={(val) => updateForm({ due_date: val })}
+        />
+      </div>
+    </CustomDialog>
+  );
+}
+
+interface EditSubtaskDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  form: SubtaskInput;
+  errors: Record<string, string>;
+  isPending: boolean;
+  updateForm: (patch: Partial<SubtaskInput>) => void;
+  onSubmit: (e: React.FormEvent) => void;
+}
+
+function EditSubtaskDialog({
+  open,
+  onOpenChange,
+  form,
+  errors,
+  isPending,
+  updateForm,
+  onSubmit,
+}: EditSubtaskDialogProps) {
+  return (
+    <CustomDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Edit Subtask"
+      description="Update the subtask details."
+      onSubmit={onSubmit}
+      submitLabel="Save"
       isPending={isPending}
       onCancel={() => onOpenChange(false)}
     >
