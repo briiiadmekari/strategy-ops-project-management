@@ -20,9 +20,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { DeleteTaskDialog, EditTaskDialog, SubtaskSection } from "@/components/tasks";
+import { TaskComments } from "./components/TaskComments";
 import { ArrowLeftIcon, OctagonAlertIcon } from "lucide-react";
 import { useTaskDetailPage } from "./hooks/useTaskDetailPage";
 import {
@@ -50,7 +52,8 @@ export default function TaskDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const { task, isLoading, isError, error, isUpdating, handleStatusChange } = useTaskDetailPage(id);
+  const { task, isLoading, isError, error, isUpdating, handleStatusChange } =
+    useTaskDetailPage(id);
 
   if (isLoading) {
     return <TaskDetailSkeleton />;
@@ -91,6 +94,7 @@ export default function TaskDetailPage({
 
   return (
     <div className="space-y-6">
+      {/* Top bar */}
       <div className="flex items-center justify-between">
         <Button variant="ghost" size="sm" asChild>
           <Link href="/my-tasks">
@@ -104,140 +108,192 @@ export default function TaskDetailPage({
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <div className="flex items-start justify-between gap-4">
-            <CardTitle className="text-xl">{task.title}</CardTitle>
-            <Select
-              value={task.status}
-              onValueChange={handleStatusChange}
-              disabled={isUpdating}
-            >
-              <SelectTrigger className={cn("h-8 w-auto text-xs gap-1 font-medium", TASK_STATUS_COLORS[task.status])}>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {TASK_STATUSES.map((s) => (
-                  <SelectItem key={s} value={s}>
-                    <span className={cn("inline-block size-2 rounded-full mr-1.5", TASK_STATUS_COLORS[s].split(" ")[0])} />
-                    {TASK_STATUS_LABELS[s]}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {task.description && (
-            <div className="space-y-1">
-              <p className="text-sm font-medium text-muted-foreground">
-                Description
-              </p>
-              <p className="text-sm whitespace-pre-wrap">{task.description}</p>
-            </div>
-          )}
-
-          <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
-            <div className="space-y-1">
-              <p className="text-sm font-medium text-muted-foreground">
-                Assignee
-              </p>
-              {task.assignee_name ? (
-                <div className="flex items-center gap-2">
-                  <Avatar size="sm">
-                    <AvatarFallback>
-                      {getInitials(task.assignee_name)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <p className="text-sm">{task.assignee_name}</p>
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">Unassigned</p>
-              )}
-            </div>
-
-            <div className="space-y-1">
-              <p className="text-sm font-medium text-muted-foreground">
-                Priority
-              </p>
-              {task.priority ? (
-                <Badge
-                  variant="secondary"
-                  className={cn(
-                    "text-xs",
-                    TASK_PRIORITY_COLORS[task.priority],
-                  )}
+      {/* Main grid: 2-column masonry-style layout */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+        {/* Left column — Title, Status, Description, Subtasks */}
+        <div className="lg:col-span-8 space-y-6">
+          <Card>
+            <CardHeader>
+              <div className="flex items-start justify-between gap-4">
+                <CardTitle className="text-xl">{task.title}</CardTitle>
+                <Select
+                  value={task.status}
+                  onValueChange={handleStatusChange}
+                  disabled={isUpdating}
                 >
-                  {TASK_PRIORITY_LABELS[task.priority]}
-                </Badge>
+                  <SelectTrigger
+                    className={cn(
+                      "h-8 w-auto text-xs gap-1 font-medium",
+                      TASK_STATUS_COLORS[task.status],
+                    )}
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {TASK_STATUSES.map((s) => (
+                      <SelectItem key={s} value={s}>
+                        <span
+                          className={cn(
+                            "inline-block size-2 rounded-full mr-1.5",
+                            TASK_STATUS_COLORS[s].split(" ")[0],
+                          )}
+                        />
+                        {TASK_STATUS_LABELS[s]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {task.description ? (
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Description
+                  </p>
+                  <div
+                    className="prose prose-sm dark:prose-invert max-w-none"
+                    dangerouslySetInnerHTML={{ __html: task.description }}
+                  />
+                </div>
               ) : (
-                <p className="text-sm text-muted-foreground">—</p>
+                <p className="text-sm text-muted-foreground">
+                  No description provided.
+                </p>
               )}
-            </div>
+            </CardContent>
+          </Card>
 
-            <div className="space-y-1">
-              <p className="text-sm font-medium text-muted-foreground">
-                Start Date
-              </p>
-              <p className="text-sm">
-                {task.start_date
-                  ? format(new Date(task.start_date), "MMM d, yyyy")
-                  : "—"}
-              </p>
-            </div>
+          <SubtaskSection task={task} />
+        </div>
 
-            <div className="space-y-1">
-              <p className="text-sm font-medium text-muted-foreground">
-                Due Date
-              </p>
-              <p className="text-sm">
-                {task.due_date
-                  ? format(new Date(task.due_date), "MMM d, yyyy")
-                  : "—"}
-              </p>
-            </div>
+        {/* Right column — Details sidebar + Comments */}
+        <div className="lg:col-span-4 space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Details</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Assignee */}
+              <div className="space-y-1">
+                <p className="text-xs font-medium text-muted-foreground">
+                  Assignee
+                </p>
+                {task.assignee_name ? (
+                  <div className="flex items-center gap-2">
+                    <Avatar size="sm">
+                      <AvatarFallback>
+                        {getInitials(task.assignee_name)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <p className="text-sm">{task.assignee_name}</p>
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">Unassigned</p>
+                )}
+              </div>
 
-            <div className="space-y-1">
-              <p className="text-sm font-medium text-muted-foreground">
-                Created
-              </p>
-              <p className="text-sm">
-                {format(new Date(task.created_at), "MMM d, yyyy")}
-              </p>
-            </div>
-          </div>
+              {/* Priority */}
+              <div className="space-y-1">
+                <p className="text-xs font-medium text-muted-foreground">
+                  Priority
+                </p>
+                {task.priority ? (
+                  <Badge
+                    variant="secondary"
+                    className={cn(
+                      "text-xs",
+                      TASK_PRIORITY_COLORS[task.priority],
+                    )}
+                  >
+                    {TASK_PRIORITY_LABELS[task.priority]}
+                  </Badge>
+                ) : (
+                  <p className="text-sm text-muted-foreground">—</p>
+                )}
+              </div>
 
-          <div className="grid grid-cols-6 gap-6 sm:grid-cols-12">
-            {task.tags && task.tags.length > 0 && (
-              <div className="space-y-2 col-span-2 sm:col-span-4">
-                <p className="text-sm font-medium text-muted-foreground">Tags</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {task.tags.map((tag) => (
-                    <Badge key={tag} variant="outline">
-                      {tag}
-                    </Badge>
-                  ))}
+              {/* Dates */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground">
+                    Start Date
+                  </p>
+                  <p className="text-sm">
+                    {task.start_date
+                      ? format(new Date(task.start_date), "MMM d, yyyy")
+                      : "—"}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground">
+                    Due Date
+                  </p>
+                  <p className="text-sm">
+                    {task.due_date
+                      ? format(new Date(task.due_date), "MMM d, yyyy")
+                      : "—"}
+                  </p>
                 </div>
               </div>
-            )}
 
-            {task.folders && task.folders.length > 0 && (
-              <div className="space-y-2 col-span-2 sm:col-span-4">
-                <p className="text-sm font-medium text-muted-foreground">Folders</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {task.folders.map((f) => (
-                    <Badge key={f.id} variant="outline">
-                      {f.name}
-                    </Badge>
-                  ))}
-                </div>
+              {/* Created */}
+              <div className="space-y-1">
+                <p className="text-xs font-medium text-muted-foreground">
+                  Created
+                </p>
+                <p className="text-sm">
+                  {format(new Date(task.created_at), "MMM d, yyyy")}
+                </p>
               </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
 
-      <SubtaskSection task={task} />
+              {/* Tags */}
+              {task.tags && task.tags.length > 0 && (
+                <>
+                  <Separator />
+                  <div className="space-y-1.5">
+                    <p className="text-xs font-medium text-muted-foreground">
+                      Tags
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {task.tags.map((tag) => (
+                        <Badge key={tag} variant="outline" className="text-xs">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* Folders */}
+              {task.folders && task.folders.length > 0 && (
+                <>
+                  <Separator />
+                  <div className="space-y-1.5">
+                    <p className="text-xs font-medium text-muted-foreground">
+                      Folders
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {task.folders.map((f) => (
+                        <Badge
+                          key={f.id}
+                          variant="outline"
+                          className="text-xs"
+                        >
+                          {f.name}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+
+          <TaskComments taskId={task.id} />
+        </div>
+      </div>
     </div>
   );
 }
@@ -246,12 +302,14 @@ function TaskDetailSkeleton() {
   return (
     <div className="space-y-6">
       <Skeleton className="h-9 w-32" />
-      <div className="space-y-4">
-        <Skeleton className="h-8 w-2/3" />
-        <Skeleton className="h-24 w-full" />
-        <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-12 w-full" />
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+        <div className="lg:col-span-8 space-y-4">
+          <Skeleton className="h-8 w-2/3" />
+          <Skeleton className="h-32 w-full" />
+        </div>
+        <div className="lg:col-span-4 space-y-4">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton key={i} className="h-10 w-full" />
           ))}
         </div>
       </div>

@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 
 import { CustomDialog } from "@/components/CustomDialog";
 import { CustomInput, type SelectOption } from "@/components/CustomInput";
+import { RichTextEditor } from "@/components/RichTextEditor";
 import { TASK_STATUSES, TASK_STATUS_LABELS } from "@/constant/task";
 import {
   TASK_PRIORITIES,
@@ -86,11 +87,10 @@ export function CreateTaskDialog({
       />
 
       {/* Description */}
-      <CustomInput
-        type="textarea"
+      <RichTextEditor
         label="Description"
         value={form.description ?? ""}
-        onChange={(e) => updateForm({ description: e.target.value })}
+        onChange={(html) => updateForm({ description: html })}
         placeholder="Enter task description (optional)"
       />
 
@@ -219,7 +219,7 @@ export function CreateTaskDialog({
             {folders.map((folder) => (
               <label
                 key={folder.id}
-                className="flex items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-accent cursor-pointer"
+                className="flex items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-sidebar cursor-pointer"
               >
                 <Checkbox
                   checked={(form.folders ?? []).some((f) => f.id === folder.id)}

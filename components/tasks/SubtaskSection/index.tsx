@@ -69,76 +69,74 @@ export function SubtaskSection({ task }: SubtaskSectionProps) {
   } = useSubtasks(task);
 
   return (
-    <div className="grid grid-cols-12">
-      <div className="col-span-5">
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg">Subtasks</CardTitle>
-              {subtasks.length > 0 && (
-                <span className="text-sm text-muted-foreground">
-                  {subtasks.length} subtask{subtasks.length !== 1 && "s"}
-                </span>
-              )}
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {subtasks.length > 0 ? (
-              <>
-                <div className="space-y-3">
-                  {subtasks.map((subtask, index) => (
-                    <SubtaskCard
-                      key={subtask.id ?? index}
-                      subtask={subtask}
-                      index={index}
-                      isPending={isPending}
-                      onStatusChange={handleSubtaskStatusChange}
-                      onEdit={handleEditOpen}
-                      onDelete={handleDelete}
-                    />
-                  ))}
-                </div>
-                <div className="flex items-center gap-2">
-                  <AddSubtaskDialog
-                    open={dialogOpen}
-                    onOpenChange={handleDialogOpenChange}
-                    form={form}
-                    errors={errors}
-                    isPending={isPending}
-                    updateForm={updateForm}
-                    onSubmit={handleAddSubmit}
-                  />
-                  <EditSubtaskDialog
-                    open={editDialogOpen}
-                    onOpenChange={handleEditDialogOpenChange}
-                    form={form}
-                    errors={errors}
-                    isPending={isPending}
-                    updateForm={updateForm}
-                    onSubmit={handleEditSubmit}
-                  />
-                </div>
-              </>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-8">
-                <p className="text-sm text-muted-foreground mb-4">
-                  Add subtask here
-                </p>
-                <AddSubtaskDialog
-                  open={dialogOpen}
-                  onOpenChange={handleDialogOpenChange}
-                  form={form}
-                  errors={errors}
-                  isPending={isPending}
-                  updateForm={updateForm}
-                  onSubmit={handleAddSubmit}
-                />
-              </div>
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg">Subtasks</CardTitle>
+          <div className="flex items-center gap-2">
+            {subtasks.length > 0 && (
+              <span className="text-sm text-muted-foreground">
+                {subtasks.length} subtask{subtasks.length !== 1 && "s"}
+              </span>
             )}
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+            <AddSubtaskDialog
+              open={dialogOpen}
+              onOpenChange={handleDialogOpenChange}
+              form={form}
+              errors={errors}
+              isPending={isPending}
+              updateForm={updateForm}
+              onSubmit={handleAddSubmit}
+            />
+            <EditSubtaskDialog
+              open={editDialogOpen}
+              onOpenChange={handleEditDialogOpenChange}
+              form={form}
+              errors={errors}
+              isPending={isPending}
+              updateForm={updateForm}
+              onSubmit={handleEditSubmit}
+            />
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {subtasks.length > 0 ? (
+          <div className="rounded-md border">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b text-xs text-muted-foreground">
+                  <th className="py-2 px-3 text-left font-medium">Title</th>
+                  <th className="py-2 px-3 text-left font-medium">Status</th>
+                  <th className="py-2 px-3 text-left font-medium">Priority</th>
+                  <th className="py-2 px-3 text-left font-medium">Due Date</th>
+                  <th className="py-2 px-3 text-right font-medium" />
+                </tr>
+              </thead>
+              <tbody>
+                {subtasks.map((subtask, index) => (
+                  <SubtaskRow
+                    key={subtask.id ?? index}
+                    subtask={subtask}
+                    index={index}
+                    isPending={isPending}
+                    onStatusChange={handleSubtaskStatusChange}
+                    onEdit={handleEditOpen}
+                    onDelete={handleDelete}
+                  />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-8">
+            <p className="text-sm text-muted-foreground">
+              No subtasks yet.
+            </p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 
@@ -151,7 +149,7 @@ function formatDate(value: string | number | null | undefined): string {
   }
 }
 
-interface SubtaskCardProps {
+interface SubtaskRowProps {
   subtask: Subtask;
   index: number;
   isPending: boolean;
@@ -160,12 +158,63 @@ interface SubtaskCardProps {
   onDelete: (index: number) => void;
 }
 
-function SubtaskCard({ subtask, index, isPending, onStatusChange, onEdit, onDelete }: SubtaskCardProps) {
+function SubtaskRow({
+  subtask,
+  index,
+  isPending,
+  onStatusChange,
+  onEdit,
+  onDelete,
+}: SubtaskRowProps) {
   return (
-    <div className="rounded-md border p-3 space-y-2">
-      <div className="flex items-start justify-between gap-2">
-        <p className="text-sm font-medium">{subtask.title}</p>
-        <div className="flex items-center gap-0.5 shrink-0">
+    <tr className="border-b last:border-b-0 hover:bg-muted/30 transition-colors">
+      {/* Title */}
+      <td className="py-2.5 px-3 text-sm font-medium">{subtask.title}</td>
+      {/* Status */}
+      <td className="py-2.5 px-3">
+        <Select
+          value={subtask.status}
+          onValueChange={(val) => onStatusChange(index, val)}
+          disabled={isPending}
+        >
+          <SelectTrigger className="h-7 w-auto text-xs gap-1">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {TASK_STATUSES.map((s) => (
+              <SelectItem key={s} value={s}>
+                <span
+                  className={cn(
+                    "inline-block size-2 rounded-full mr-1.5",
+                    TASK_STATUS_COLORS[s].split(" ")[0],
+                  )}
+                />
+                {TASK_STATUS_LABELS[s]}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </td>
+      {/* Priority */}
+      <td className="py-2.5 px-3">
+        {subtask.priority ? (
+          <Badge
+            variant="secondary"
+            className={cn("text-xs", TASK_PRIORITY_COLORS[subtask.priority])}
+          >
+            {TASK_PRIORITY_LABELS[subtask.priority]}
+          </Badge>
+        ) : (
+          <span className="text-muted-foreground text-sm">—</span>
+        )}
+      </td>
+      {/* Due Date */}
+      <td className="py-2.5 px-3 text-sm text-muted-foreground">
+        {formatDate(subtask.due_date)}
+      </td>
+      {/* Actions */}
+      <td className="py-2.5 px-3 text-right">
+        <div className="flex items-center gap-0.5 justify-end">
           <Button
             variant="ghost"
             size="icon-sm"
@@ -185,46 +234,8 @@ function SubtaskCard({ subtask, index, isPending, onStatusChange, onEdit, onDele
             <TrashIcon className="size-4" />
           </Button>
         </div>
-      </div>
-
-      {subtask.description && (
-        <p className="text-xs text-muted-foreground">{subtask.description}</p>
-      )}
-
-      <div className="flex items-center gap-2 flex-wrap">
-        <Select
-          value={subtask.status}
-          onValueChange={(val) => onStatusChange(index, val)}
-          disabled={isPending}
-        >
-          <SelectTrigger className="h-7 w-auto text-xs gap-1">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {TASK_STATUSES.map((s) => (
-              <SelectItem key={s} value={s}>
-                <span className={cn("inline-block size-2 rounded-full mr-1.5", TASK_STATUS_COLORS[s].split(" ")[0])} />
-                {TASK_STATUS_LABELS[s]}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        {subtask.priority && (
-          <Badge
-            variant="secondary"
-            className={cn("text-xs", TASK_PRIORITY_COLORS[subtask.priority])}
-          >
-            {TASK_PRIORITY_LABELS[subtask.priority]}
-          </Badge>
-        )}
-      </div>
-
-      <div className="flex items-center gap-4 text-xs text-muted-foreground">
-        <span>Start: {formatDate(subtask.start_date)}</span>
-        <span>Due: {formatDate(subtask.due_date)}</span>
-      </div>
-    </div>
+      </td>
+    </tr>
   );
 }
 

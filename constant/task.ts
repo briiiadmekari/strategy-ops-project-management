@@ -36,6 +36,32 @@ export const TASK_STATUS_COLORS: Record<TaskStatus, string> = {
   FIXING: "bg-purple-100 text-purple-700",
 };
 
+export const TASK_ICON_COLORS: Record<TaskStatus, string> = {
+  // double border to make like an outer ring effect, since we don't have an actual "ring" utility for icons
+  BACKLOG: "text-zinc-400 fill-zinc-400 hover:text-zinc-500 hover:fill-zinc-500 ",
+  NOT_STARTED: "text-slate-400 fill-slate-400 hover:text-slate-500 hover:fill-slate-500",
+  IN_PROGRESS: "text-blue-400 fill-blue-400 hover:text-blue-500 hover:fill-blue-500",
+  IN_REVIEW: "text-amber-400 fill-amber-400 hover:text-amber-500 hover:fill-amber-500",
+  BLOCKED: "text-red-400 fill-red-400 hover:text-red-500 hover:fill-red-500",
+  CANCELED: "text-zinc-300 fill-zinc-300 hover:text-zinc-400 hover:fill-zinc-400",
+  COMPLETED: "text-emerald-400 fill-emerald-400 hover:text-emerald-500 hover:fill-emerald-500",
+  DONE: "text-green-400 fill-green-400 hover:text-green-500 hover:fill-green-500",
+  FIXING: "text-purple-400 fill-purple-400 hover:text-purple-500 hover:fill-purple-500",
+};
+
+export const TASK_ICON_BORDER_COLORS: Record<TaskStatus, string> = {
+  BACKLOG: "text-zinc-400",
+  NOT_STARTED: "text-slate-400",
+  IN_PROGRESS: "text-blue-400",
+  IN_REVIEW: "text-amber-400",
+  BLOCKED: "text-red-400",
+  CANCELED: "text-zinc-300",
+  COMPLETED: "text-emerald-400",
+  DONE: "text-green-400",
+  FIXING: "text-purple-400",
+};
+
+
 export const TASK_PRIORITIES = [
   "URGENT",
   "HIGH",

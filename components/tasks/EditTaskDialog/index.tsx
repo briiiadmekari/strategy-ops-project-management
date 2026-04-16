@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 
 import { CustomDialog } from "@/components/CustomDialog";
 import { CustomInput, type SelectOption } from "@/components/CustomInput";
+import { RichTextEditor } from "@/components/RichTextEditor";
 import { TASK_STATUSES, TASK_STATUS_LABELS } from "@/constant/task";
 import {
   TASK_PRIORITIES,
@@ -87,11 +88,10 @@ export function EditTaskDialog({ task }: EditTaskDialogProps) {
       />
 
       {/* Description */}
-      <CustomInput
-        type="textarea"
+      <RichTextEditor
         label="Description"
         value={form.description ?? ""}
-        onChange={(e) => updateForm({ description: e.target.value })}
+        onChange={(html) => updateForm({ description: html })}
         placeholder="Enter task description (optional)"
       />
 

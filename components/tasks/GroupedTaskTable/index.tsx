@@ -18,6 +18,7 @@ import {
   ChevronDownIcon,
   ChevronRightIcon,
   EyeIcon,
+  Hexagon
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Task, Subtask } from "@/types/task";
@@ -30,6 +31,8 @@ import {
   TASK_TAG_COLORS,
   type TaskStatus,
   type TaskTag,
+  TASK_ICON_COLORS,
+  TASK_ICON_BORDER_COLORS,
 } from "@/constant/task";
 
 function getInitials(name: string): string {
@@ -92,8 +95,10 @@ export function GroupedTaskTable({ data, isLoading }: GroupedTaskTableProps) {
             <th className="py-2 px-4 text-left font-medium">Title</th>
             <th className="py-2 px-3 text-left font-medium">Priority</th>
             <th className="py-2 px-3 text-left font-medium">Assignee</th>
+            <th className="py-2 px-3 text-left font-medium">Start Date</th>
             <th className="py-2 px-3 text-left font-medium">Due Date</th>
             <th className="py-2 px-3 text-left font-medium">Tags</th>
+            <th className="py-2 px-3 text-left font-medium">Created At</th>
             <th className="py-2 px-3 text-right font-medium" />
           </tr>
         </thead>
@@ -116,7 +121,7 @@ function StatusGroup({ status, tasks }: { status: TaskStatus; tasks: Task[] }) {
         className=" hover:bg-muted/50 transition-colors cursor-pointer"
         onClick={() => setExpanded((prev) => !prev)}
       >
-        <td colSpan={7} className="px-4 py-2.5">
+        <td colSpan={9} className="px-4 py-2.5">
           <div className="flex items-center gap-3">
             <ChevronDownIcon
               className={cn(
@@ -137,12 +142,12 @@ function StatusGroup({ status, tasks }: { status: TaskStatus; tasks: Task[] }) {
         </td>
       </tr>
       {expanded &&
-        tasks.map((task) => <TaskRow key={task.id} task={task} />)}
+        tasks.map((task) => <TaskRow key={task.id} task={task} status={status} />)}
     </>
   );
 }
 
-function TaskRow({ task }: { task: Task }) {
+function TaskRow({ task, status }: { task: Task; status: TaskStatus }) {
   const hasSubtasks = task.subtasks && task.subtasks.length > 0;
   const [subtasksExpanded, setSubtasksExpanded] = useState(false);
 
@@ -167,7 +172,16 @@ function TaskRow({ task }: { task: Task }) {
           ) : null}
         </td>
         {/* Title */}
-        <td className="py-2.5 px-4 text-sm">
+        <td className="flex items-center gap-2 py-2.5 px-4 text-sm">
+          <div className="relative inline-block">
+            <Hexagon className={cn("size-6", TASK_ICON_BORDER_COLORS[status])} />
+            <Hexagon 
+              className={cn(
+                "size-4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2", 
+                TASK_ICON_COLORS[status]
+              )} 
+            />
+          </div>
           <Link
             href={`/tasks/${task.id}`}
             className="font-medium hover:underline"
@@ -203,6 +217,10 @@ function TaskRow({ task }: { task: Task }) {
             <span className="text-muted-foreground text-sm">—</span>
           )}
         </td>
+        {/* Start Date */}
+        <td className="py-2.5 px-3 text-sm text-muted-foreground">
+          {formatDate(task.start_date)}
+        </td>
         {/* Due Date */}
         <td className="py-2.5 px-3 text-sm text-muted-foreground">
           {formatDate(task.due_date)}
@@ -233,6 +251,10 @@ function TaskRow({ task }: { task: Task }) {
             <span className="text-muted-foreground text-sm">—</span>
           )}
         </td>
+        {/* Created At */}
+        <td className="py-2.5 px-3 text-sm text-muted-foreground">
+          {formatDate(task.created_at)}
+        </td>
         {/* Actions */}
         <td className="py-2.5 px-3 text-right">
           <div className="flex items-center gap-1 justify-end">
@@ -260,8 +282,11 @@ function SubtaskRow({ subtask }: { subtask: Subtask }) {
       {/* expand col — empty */}
       <td />
       {/* title — indented */}
-      <td className="py-2 px-4 pl-10 text-sm text-muted-foreground">
-        {subtask.title}
+      <td className="flex items-center gap-2 py-2 px-4 pl-10 ">
+        <Hexagon className={cn("size-3", TASK_ICON_COLORS[subtask.status])} />
+        <span className="text-sm text-muted-foreground">
+          {subtask.title}
+        </span>
       </td>
       {/* priority */}
       <td className="py-2 px-3">
@@ -279,6 +304,7 @@ function SubtaskRow({ subtask }: { subtask: Subtask }) {
       {/* remaining cols empty */}
       <td />
       
+      <td />
       <td />
       <td />
     </tr>
