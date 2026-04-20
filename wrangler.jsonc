@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "main": ".open-next/worker.js",
-  "name": "strategy-ops-project-management-tools",
+  "name": "strategy-ops-project-management",
   "compatibility_date": "2026-04-20",
   "compatibility_flags": [
     // Enable Node.js API
