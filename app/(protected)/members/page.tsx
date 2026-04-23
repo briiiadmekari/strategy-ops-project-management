@@ -1,29 +1,13 @@
-"use client";
+'use client';
 
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Skeleton } from "@/components/ui/skeleton";
-import { OctagonAlertIcon } from "lucide-react";
-import { useMembersPage } from "./hooks/useMembersPage";
-import { CreateMemberDialog } from "./components/CreateMemberDialog";
-
-function getInitials(name: string): string {
-  return name
-    .split(" ")
-    .map((part) => part[0])
-    .filter(Boolean)
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
-}
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Skeleton } from '@/components/ui/skeleton';
+import { OctagonAlertIcon } from 'lucide-react';
+import { useMembersPage } from './hooks/useMembersPage';
+import { CreateMemberDialog } from './components/CreateMemberDialog';
+import { getInitials } from '@/utils/string';
 
 export default function MembersPage() {
   const { members, isLoading, isError, error } = useMembersPage();
@@ -33,9 +17,7 @@ export default function MembersPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Members</h1>
-          <p className="text-sm text-muted-foreground">
-            Manage team members and their roles.
-          </p>
+          <p className="text-sm text-muted-foreground">Manage team members and their roles.</p>
         </div>
         <CreateMemberDialog />
       </div>
@@ -43,9 +25,7 @@ export default function MembersPage() {
       {isError && (
         <Alert variant="destructive">
           <OctagonAlertIcon />
-          <AlertDescription>
-            {error?.message ?? "Failed to load members."}
-          </AlertDescription>
+          <AlertDescription>{error?.message ?? 'Failed to load members.'}</AlertDescription>
         </Alert>
       )}
 
@@ -74,10 +54,7 @@ export default function MembersPage() {
               ))
             ) : members.length === 0 ? (
               <TableRow>
-                <TableCell
-                  colSpan={2}
-                  className="text-center text-muted-foreground py-8"
-                >
+                <TableCell colSpan={2} className="text-center text-muted-foreground py-8">
                   No members found.
                 </TableCell>
               </TableRow>
@@ -87,9 +64,7 @@ export default function MembersPage() {
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <Avatar size="default">
-                        <AvatarFallback>
-                          {getInitials(member.name)}
-                        </AvatarFallback>
+                        <AvatarFallback>{getInitials(member.name)}</AvatarFallback>
                       </Avatar>
                       <span className="font-medium">{member.name}</span>
                     </div>

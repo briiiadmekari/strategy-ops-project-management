@@ -10,17 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
+import { CustomAlertDialog } from '@/components/CustomAlertDialog';
 import { GroupedTaskTable } from '@/components/GroupedTaskTable';
 import { TaskFilter } from '@/components/TaskFilter';
 import { CreateTaskDialog } from '@/components/CreateTaskDialog';
@@ -112,26 +102,18 @@ export default function FolderDetailPage({ params }: { params: Promise<{ id: str
         <div className="flex items-center gap-2">
           <CreateTaskDialog defaultFolders={[{ id: folder.id, name: folder.name }]} />
           {isCreator && (
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
+            <CustomAlertDialog
+              trigger={
                 <Button variant="destructive" size="sm" disabled={isDeleting}>
                   <TrashIcon />
                   Delete Folder
                 </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Delete folder?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This will delete the folder &quot;{folder.name}&quot;. Tasks inside will not be deleted.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDeleteFolder}>Delete</AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+              }
+              title="Delete folder?"
+              description={`This will delete the folder "${folder.name}". Tasks inside will not be deleted.`}
+              confirmLabel="Delete"
+              onConfirm={handleDeleteFolder}
+            />
           )}
         </div>
       </div>

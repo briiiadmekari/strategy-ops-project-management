@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { format } from 'date-fns';
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -12,6 +11,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { DeleteTaskDialog } from '@/components/DeleteTaskDialog';
 import { ChevronDownIcon, ChevronRightIcon, EyeIcon, Hexagon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getInitials } from '@/utils/string';
+import { formatDate } from '@/utils/date';
 import type { Task, Subtask } from '@/types/task';
 import {
   TASK_STATUSES,
@@ -25,25 +26,6 @@ import {
   TASK_ICON_COLORS,
   TASK_ICON_BORDER_COLORS,
 } from '@/constant/task';
-
-function getInitials(name: string): string {
-  return name
-    .split(' ')
-    .map((part) => part[0])
-    .filter(Boolean)
-    .slice(0, 2)
-    .join('')
-    .toUpperCase();
-}
-
-function formatDate(value: string | number | null): string {
-  if (!value) return '—';
-  try {
-    return format(new Date(value), 'dd/MM/yyyy');
-  } catch {
-    return '—';
-  }
-}
 
 interface GroupedTaskTableProps {
   data: Task[];

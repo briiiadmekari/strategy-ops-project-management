@@ -1,34 +1,19 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { CustomDialog } from "@/components/CustomDialog";
-import { CustomInput, type SelectOption } from "@/components/CustomInput";
-import { TASK_STATUSES, TASK_STATUS_LABELS, TASK_STATUS_COLORS } from "@/constant/task";
-import {
-  TASK_PRIORITIES,
-  TASK_PRIORITY_LABELS,
-  TASK_PRIORITY_COLORS,
-} from "@/constant/task";
-import type { SubtaskInput } from "@/schema/taskSchema";
-import { PlusIcon, TrashIcon, PencilIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { format } from "date-fns";
-import type { Task, Subtask } from "@/types/task";
-import { useSubtasks } from "./hooks/useSubtasks";
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { CustomDialog } from '@/components/CustomDialog';
+import { CustomInput, type SelectOption } from '@/components/CustomInput';
+import { TASK_STATUSES, TASK_STATUS_LABELS, TASK_STATUS_COLORS } from '@/constant/task';
+import { TASK_PRIORITIES, TASK_PRIORITY_LABELS, TASK_PRIORITY_COLORS } from '@/constant/task';
+import type { SubtaskInput } from '@/schema/taskSchema';
+import { PlusIcon, TrashIcon, PencilIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { formatDateDisplay } from '@/utils/date';
+import type { Task, Subtask } from '@/types/task';
+import { useSubtasks } from './hooks/useSubtasks';
 
 const statusOptions: SelectOption[] = TASK_STATUSES.map((s) => ({
   value: s,
@@ -36,13 +21,11 @@ const statusOptions: SelectOption[] = TASK_STATUSES.map((s) => ({
 }));
 
 const priorityOptions: SelectOption[] = [
-  { value: "none", label: "None" },
+  { value: 'none', label: 'None' },
   ...TASK_PRIORITIES.map((p) => ({
     value: p,
     label: TASK_PRIORITY_LABELS[p],
-    icon: (
-      <span className={cn("size-2 rounded-full", TASK_PRIORITY_COLORS[p])} />
-    ),
+    icon: <span className={cn('size-2 rounded-full', TASK_PRIORITY_COLORS[p])} />,
   })),
 ];
 
@@ -76,7 +59,7 @@ export function SubtaskSection({ task }: SubtaskSectionProps) {
           <div className="flex items-center gap-2">
             {subtasks.length > 0 && (
               <span className="text-sm text-muted-foreground">
-                {subtasks.length} subtask{subtasks.length !== 1 && "s"}
+                {subtasks.length} subtask{subtasks.length !== 1 && 's'}
               </span>
             )}
             <AddSubtaskDialog
@@ -130,23 +113,12 @@ export function SubtaskSection({ task }: SubtaskSectionProps) {
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-8">
-            <p className="text-sm text-muted-foreground">
-              No subtasks yet.
-            </p>
+            <p className="text-sm text-muted-foreground">No subtasks yet.</p>
           </div>
         )}
       </CardContent>
     </Card>
   );
-}
-
-function formatDate(value: string | number | null | undefined): string {
-  if (value == null) return "—";
-  try {
-    return format(new Date(value), "MMM d, yyyy");
-  } catch {
-    return "—";
-  }
 }
 
 interface SubtaskRowProps {
@@ -158,37 +130,21 @@ interface SubtaskRowProps {
   onDelete: (index: number) => void;
 }
 
-function SubtaskRow({
-  subtask,
-  index,
-  isPending,
-  onStatusChange,
-  onEdit,
-  onDelete,
-}: SubtaskRowProps) {
+function SubtaskRow({ subtask, index, isPending, onStatusChange, onEdit, onDelete }: SubtaskRowProps) {
   return (
     <tr className="border-b last:border-b-0 hover:bg-muted/30 transition-colors">
       {/* Title */}
       <td className="py-2.5 px-3 text-sm font-medium">{subtask.title}</td>
       {/* Status */}
       <td className="py-2.5 px-3">
-        <Select
-          value={subtask.status}
-          onValueChange={(val) => onStatusChange(index, val)}
-          disabled={isPending}
-        >
+        <Select value={subtask.status} onValueChange={(val) => onStatusChange(index, val)} disabled={isPending}>
           <SelectTrigger className="h-7 w-auto text-xs gap-1">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
             {TASK_STATUSES.map((s) => (
               <SelectItem key={s} value={s}>
-                <span
-                  className={cn(
-                    "inline-block size-2 rounded-full mr-1.5",
-                    TASK_STATUS_COLORS[s].split(" ")[0],
-                  )}
-                />
+                <span className={cn('inline-block size-2 rounded-full mr-1.5', TASK_STATUS_COLORS[s].split(' ')[0])} />
                 {TASK_STATUS_LABELS[s]}
               </SelectItem>
             ))}
@@ -198,10 +154,7 @@ function SubtaskRow({
       {/* Priority */}
       <td className="py-2.5 px-3">
         {subtask.priority ? (
-          <Badge
-            variant="secondary"
-            className={cn("text-xs", TASK_PRIORITY_COLORS[subtask.priority])}
-          >
+          <Badge variant="secondary" className={cn('text-xs', TASK_PRIORITY_COLORS[subtask.priority])}>
             {TASK_PRIORITY_LABELS[subtask.priority]}
           </Badge>
         ) : (
@@ -209,9 +162,7 @@ function SubtaskRow({
         )}
       </td>
       {/* Due Date */}
-      <td className="py-2.5 px-3 text-sm text-muted-foreground">
-        {formatDate(subtask.due_date)}
-      </td>
+      <td className="py-2.5 px-3 text-sm text-muted-foreground">{formatDateDisplay(subtask.due_date)}</td>
       {/* Actions */}
       <td className="py-2.5 px-3 text-right">
         <div className="flex items-center gap-0.5 justify-end">
@@ -286,7 +237,7 @@ function AddSubtaskDialog({
       <CustomInput
         type="textarea"
         label="Description"
-        value={form.description ?? ""}
+        value={form.description ?? ''}
         onChange={(e) => updateForm({ description: e.target.value })}
         placeholder="Enter description (optional)"
       />
@@ -296,22 +247,17 @@ function AddSubtaskDialog({
           type="select"
           label="Status"
           value={form.status}
-          onValueChange={(value) =>
-            updateForm({ status: value as SubtaskInput["status"] })
-          }
+          onValueChange={(value) => updateForm({ status: value as SubtaskInput['status'] })}
           options={statusOptions}
         />
 
         <CustomInput
           type="select"
           label="Priority"
-          value={form.priority ?? "none"}
+          value={form.priority ?? 'none'}
           onValueChange={(value) =>
             updateForm({
-              priority:
-                value === "none"
-                  ? undefined
-                  : (value as SubtaskInput["priority"]),
+              priority: value === 'none' ? undefined : (value as SubtaskInput['priority']),
             })
           }
           options={priorityOptions}
@@ -378,7 +324,7 @@ function EditSubtaskDialog({
       <CustomInput
         type="textarea"
         label="Description"
-        value={form.description ?? ""}
+        value={form.description ?? ''}
         onChange={(e) => updateForm({ description: e.target.value })}
         placeholder="Enter description (optional)"
       />
@@ -388,22 +334,17 @@ function EditSubtaskDialog({
           type="select"
           label="Status"
           value={form.status}
-          onValueChange={(value) =>
-            updateForm({ status: value as SubtaskInput["status"] })
-          }
+          onValueChange={(value) => updateForm({ status: value as SubtaskInput['status'] })}
           options={statusOptions}
         />
 
         <CustomInput
           type="select"
           label="Priority"
-          value={form.priority ?? "none"}
+          value={form.priority ?? 'none'}
           onValueChange={(value) =>
             updateForm({
-              priority:
-                value === "none"
-                  ? undefined
-                  : (value as SubtaskInput["priority"]),
+              priority: value === 'none' ? undefined : (value as SubtaskInput['priority']),
             })
           }
           options={priorityOptions}

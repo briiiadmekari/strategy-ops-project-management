@@ -2,7 +2,6 @@
 
 import { use } from 'react';
 import Link from 'next/link';
-import { format } from 'date-fns';
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -18,6 +17,8 @@ import { SubtaskSection } from '@/components/SubtaskSection';
 import { TaskComments } from './components/TaskComments';
 import { ArrowLeftIcon, OctagonAlertIcon } from 'lucide-react';
 import { useTaskDetailPage } from './hooks/useTaskDetailPage';
+import { getInitials } from '@/utils/string';
+import { formatDateDisplay } from '@/utils/date';
 import {
   TASK_STATUSES,
   TASK_STATUS_LABELS,
@@ -26,16 +27,6 @@ import {
   TASK_PRIORITY_COLORS,
 } from '@/constant/task';
 import { cn } from '@/lib/utils';
-
-function getInitials(name: string): string {
-  return name
-    .split(' ')
-    .map((part) => part[0])
-    .filter(Boolean)
-    .slice(0, 2)
-    .join('')
-    .toUpperCase();
-}
 
 export default function TaskDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -175,18 +166,18 @@ export default function TaskDetailPage({ params }: { params: Promise<{ id: strin
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <p className="text-xs font-medium text-muted-foreground">Start Date</p>
-                  <p className="text-sm">{task.start_date ? format(new Date(task.start_date), 'MMM d, yyyy') : '—'}</p>
+                  <p className="text-sm">{formatDateDisplay(task.start_date)}</p>
                 </div>
                 <div className="space-y-1">
                   <p className="text-xs font-medium text-muted-foreground">Due Date</p>
-                  <p className="text-sm">{task.due_date ? format(new Date(task.due_date), 'MMM d, yyyy') : '—'}</p>
+                  <p className="text-sm">{formatDateDisplay(task.due_date)}</p>
                 </div>
               </div>
 
               {/* Created */}
               <div className="space-y-1">
                 <p className="text-xs font-medium text-muted-foreground">Created</p>
-                <p className="text-sm">{format(new Date(task.created_at), 'MMM d, yyyy')}</p>
+                <p className="text-sm">{formatDateDisplay(task.created_at)}</p>
               </div>
 
               {/* Tags */}

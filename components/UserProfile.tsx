@@ -1,18 +1,9 @@
-"use client";
+'use client';
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useMe } from "@/composables/queries";
-
-function getInitials(name: string): string {
-  return name
-    .split(" ")
-    .map((part) => part[0])
-    .filter(Boolean)
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
-}
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useMe } from '@/composables/queries';
+import { getInitials } from '@/utils/string';
 
 export function UserProfile() {
   const { data: meData, isLoading } = useMe();
