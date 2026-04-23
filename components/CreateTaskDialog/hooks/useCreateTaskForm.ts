@@ -21,7 +21,7 @@ const DEFAULT_VALUES: CreateTaskForm = {
   description: '',
   status: 'BACKLOG',
   priority: undefined,
-  assignee: undefined,
+  assignee: { id: '', name: '', email: '' },
   start_date: undefined,
   due_date: undefined,
   tags: [],

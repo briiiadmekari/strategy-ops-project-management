@@ -55,10 +55,7 @@ export function EditTaskDialog({ task }: EditTaskDialogProps) {
   const watchedFolders = watch('folders') ?? [];
   const watchedTags = watch('tags') ?? [];
 
-  const assigneeOptions: SelectOption[] = [
-    { value: 'unassigned', label: 'Unassigned' },
-    ...members.map((m) => ({ value: m.id, label: m.name })),
-  ];
+  const assigneeOptions: SelectOption[] = [...members.map((m) => ({ value: m.id, label: m.name }))];
 
   return (
     <CustomDialog
@@ -148,20 +145,16 @@ export function EditTaskDialog({ task }: EditTaskDialogProps) {
           <CustomInput
             type="select"
             label="Assignee"
-            value={field.value?.id ?? 'unassigned'}
+            value={field.value?.id ?? ''}
             onValueChange={(value) => {
-              if (value === 'unassigned') {
-                field.onChange(undefined);
-              } else {
-                const member = members.find((m) => m.id === value);
-                if (member) {
-                  field.onChange({ id: member.id, name: member.name, email: member.email });
-                }
+              const member = members.find((m) => m.id === value);
+              if (member) {
+                field.onChange({ id: member.id, name: member.name, email: member.email });
               }
             }}
             options={assigneeOptions}
-            placeholder="Unassigned"
-            error={errors.assignee?.message}
+            placeholder="Select assignee"
+            error={errors.assignee?.id?.message}
           />
         )}
       />
