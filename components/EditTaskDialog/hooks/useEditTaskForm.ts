@@ -14,6 +14,7 @@ import { useMembers, useFolders } from '@/composables/queries';
 import { format } from 'date-fns';
 import type { Task } from '@/types/task';
 import type { ApiResponse } from '@/types/api';
+import { UpdateTaskInput } from '@/schema/taskSchema';
 
 type UpdateTaskForm = z.infer<typeof updateTaskSchema>;
 
