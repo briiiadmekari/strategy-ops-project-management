@@ -1,9 +1,11 @@
-"use client";
+'use client';
 
-import { GroupedTaskTable, TaskFilter, CreateTaskDialog } from "@/components/tasks";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { OctagonAlertIcon } from "lucide-react";
-import { useMyTasksPage } from "./hooks/useMyTasksPage";
+import { GroupedTaskTable } from '@/components/GroupedTaskTable';
+import { TaskFilter } from '@/components/TaskFilter';
+import { CreateTaskDialog } from '@/components/CreateTaskDialog';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { OctagonAlertIcon } from 'lucide-react';
+import { useMyTasksPage } from './hooks/useMyTasksPage';
 
 export default function MyTasksPage() {
   const {
@@ -18,7 +20,7 @@ export default function MyTasksPage() {
     handleTagChange,
     isLoading,
     isError,
-    error
+    error,
   } = useMyTasksPage();
 
   return (
@@ -26,9 +28,7 @@ export default function MyTasksPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">My Tasks</h1>
-          <p className="text-sm text-muted-foreground">
-            Tasks assigned to you.
-          </p>
+          <p className="text-sm text-muted-foreground">Tasks assigned to you.</p>
         </div>
         <CreateTaskDialog />
       </div>
@@ -36,9 +36,7 @@ export default function MyTasksPage() {
       {isError && (
         <Alert variant="destructive">
           <OctagonAlertIcon />
-          <AlertDescription>
-            {error?.message ?? "Failed to load tasks."}
-          </AlertDescription>
+          <AlertDescription>{error?.message ?? 'Failed to load tasks.'}</AlertDescription>
         </Alert>
       )}
 

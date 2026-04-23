@@ -1,17 +1,14 @@
-"use client";
+'use client';
 
-import { Badge } from "@/components/ui/badge";
-import { CustomTable } from "@/components/CustomTable";
-import { TableRow, TableCell } from "@/components/ui/table";
-import { TaskStatusBadge } from "@/components/tasks/TaskStatusBadge";
-import { cn } from "@/lib/utils";
-import type { Task } from "@/types/task";
-import type { Row } from "@tanstack/react-table";
-import {
-  TASK_PRIORITY_LABELS,
-  TASK_PRIORITY_COLORS,
-} from "@/constant/task";
-import { columns } from "./partials/columns";
+import { Badge } from '@/components/ui/badge';
+import { CustomTable } from '@/components/CustomTable';
+import { TableRow, TableCell } from '@/components/ui/table';
+import { TaskStatusBadge } from '@/components/TaskStatusBadge';
+import { cn } from '@/lib/utils';
+import type { Task } from '@/types/task';
+import type { Row } from '@tanstack/react-table';
+import { TASK_PRIORITY_LABELS, TASK_PRIORITY_COLORS } from '@/constant/task';
+import { columns } from './partials/columns';
 
 function renderSubRow(row: Row<Task>) {
   const subtasks = row.original.subtasks;
@@ -26,9 +23,7 @@ function renderSubRow(row: Row<Task>) {
       {/* expand col — empty */}
       <TableCell />
       {/* title — indented */}
-      <TableCell className="pl-8 text-sm text-muted-foreground">
-        {subtask.title}
-      </TableCell>
+      <TableCell className="pl-8 text-sm text-muted-foreground">{subtask.title}</TableCell>
       {/* status */}
       <TableCell>
         <TaskStatusBadge status={subtask.status} />
@@ -36,10 +31,7 @@ function renderSubRow(row: Row<Task>) {
       {/* priority */}
       <TableCell>
         {subtask.priority ? (
-          <Badge
-            variant="secondary"
-            className={cn("text-xs", TASK_PRIORITY_COLORS[subtask.priority])}
-          >
+          <Badge variant="secondary" className={cn('text-xs', TASK_PRIORITY_COLORS[subtask.priority])}>
             {TASK_PRIORITY_LABELS[subtask.priority]}
           </Badge>
         ) : (
@@ -47,10 +39,7 @@ function renderSubRow(row: Row<Task>) {
         )}
       </TableCell>
       {/* remaining cols empty */}
-      {emptyTrailingCols > 0 &&
-        Array.from({ length: emptyTrailingCols }).map((_, j) => (
-          <TableCell key={j} />
-        ))}
+      {emptyTrailingCols > 0 && Array.from({ length: emptyTrailingCols }).map((_, j) => <TableCell key={j} />)}
     </TableRow>
   ));
 }
@@ -67,9 +56,7 @@ export function TaskTable({ data, isLoading }: TaskTableProps) {
       data={data}
       isLoading={isLoading}
       emptyMessage="No tasks found."
-      getRowCanExpand={(row) =>
-        Boolean(row.original.subtasks && row.original.subtasks.length > 0)
-      }
+      getRowCanExpand={(row) => Boolean(row.original.subtasks && row.original.subtasks.length > 0)}
       renderSubRow={renderSubRow}
     />
   );

@@ -1,0 +1,1 @@
+export const OTP_COOLDOWN_SECONDS = 120;

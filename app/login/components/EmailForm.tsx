@@ -1,11 +1,9 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Spinner } from "@/components/ui/spinner";
-import { OctagonAlertIcon } from "lucide-react";
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { OctagonAlertIcon } from 'lucide-react';
+import { CustomButton } from '@/components/CustomButton';
+import { CustomInput } from '@/components/CustomInput';
 
 interface EmailFormProps {
   email: string;
@@ -16,20 +14,12 @@ interface EmailFormProps {
   countdown: number;
 }
 
-export function EmailForm({
-  email,
-  onEmailChange,
-  onSubmit,
-  isPending,
-  error,
-  countdown,
-}: EmailFormProps) {
+export function EmailForm({ email, onEmailChange, onSubmit, isPending, error, countdown }: EmailFormProps) {
   return (
     <form onSubmit={onSubmit} className="w-full space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="email">Work Email</Label>
-        <Input
-          id="email"
+        <CustomInput
+          label="Work Email"
           type="email"
           required
           disabled={isPending}
@@ -45,21 +35,15 @@ export function EmailForm({
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
-
-      <Button
+      <CustomButton
+        title={isPending ? 'Sending OTP...' : countdown > 0 ? `Wait ${countdown}s` : 'Send OTP'}
         type="submit"
-        className="w-full"
+        variant="default"
         size="lg"
+        isPending={isPending}
         disabled={isPending || countdown > 0}
-      >
-        {isPending ? (
-          <Spinner className="size-4" />
-        ) : countdown > 0 ? (
-          `Wait ${countdown}s`
-        ) : (
-          "Send OTP"
-        )}
-      </Button>
+        className="w-full"
+      />
     </form>
   );
 }

@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import Image from "next/image";
-import { usePathname } from "next/navigation";
-import { useTheme } from "next-themes";
+import Link from 'next/link';
+import Image from 'next/image';
+import { usePathname } from 'next/navigation';
+import { useTheme } from 'next-themes';
 import {
   LayoutDashboardIcon,
   ClipboardListIcon,
@@ -14,7 +14,7 @@ import {
   UsersIcon,
   FolderIcon,
   ScrollTextIcon,
-} from "lucide-react";
+} from 'lucide-react';
 
 import {
   Sidebar,
@@ -27,35 +27,33 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar";
-import { Toggle } from "@/components/ui/toggle";
-import { Skeleton } from "@/components/ui/skeleton";
-import { TOKEN_KEY } from "@/constant/auth";
-import { useMe, useFolders } from "@/composables/queries";
-import { CreateFolderDialog } from "@/components/folders";
+} from '@/components/ui/sidebar';
+import { Toggle } from '@/components/ui/toggle';
+import { Skeleton } from '@/components/ui/skeleton';
+import { TOKEN_KEY } from '@/constant/auth';
+import { useMe, useFolders } from '@/composables/queries';
+import { CreateFolderDialog } from '@/components/CreateFolderDialog';
 
 const NAV_ITEMS = [
-  { title: "Dashboard", href: "/", icon: LayoutDashboardIcon },
-  { title: "My Tasks", href: "/my-tasks", icon: ClipboardListIcon },
-  { title: "All Tasks", href: "/all-tasks", icon: ListChecksIcon },
-  { title: "Logs", href: "/logs", icon: ScrollTextIcon },
+  { title: 'Dashboard', href: '/', icon: LayoutDashboardIcon },
+  { title: 'My Tasks', href: '/my-tasks', icon: ClipboardListIcon },
+  { title: 'All Tasks', href: '/all-tasks', icon: ListChecksIcon },
+  { title: 'Logs', href: '/logs', icon: ScrollTextIcon },
 ];
 
-const ADMIN_ITEMS = [
-  { title: "Members", href: "/members", icon: UsersIcon },
-];
+const ADMIN_ITEMS = [{ title: 'Members', href: '/members', icon: UsersIcon }];
 
 export function AppSidebar() {
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
   const { data: meData } = useMe();
   const { data: foldersData, isLoading: isFoldersLoading } = useFolders();
-  const isSuperadmin = meData?.data?.role === "superadmin";
+  const isSuperadmin = meData?.data?.role === 'superadmin';
   const folders = foldersData?.data?.items ?? [];
 
   function handleLogout() {
     sessionStorage.removeItem(TOKEN_KEY);
-    window.location.href = "/login";
+    window.location.href = '/login';
   }
 
   return (
@@ -117,10 +115,7 @@ export function AppSidebar() {
               ) : folders.length > 0 ? (
                 folders.map((folder) => (
                   <SidebarMenuItem key={folder.id}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={pathname === `/folders/${folder.id}`}
-                    >
+                    <SidebarMenuButton asChild isActive={pathname === `/folders/${folder.id}`}>
                       <Link href={`/folders/${folder.id}`}>
                         <FolderIcon />
                         <span>{folder.name}</span>
@@ -129,9 +124,7 @@ export function AppSidebar() {
                   </SidebarMenuItem>
                 ))
               ) : (
-                <p className="px-4 py-2 text-xs text-muted-foreground">
-                  No folders yet
-                </p>
+                <p className="px-4 py-2 text-xs text-muted-foreground">No folders yet</p>
               )}
             </SidebarMenu>
           </SidebarGroupContent>
@@ -165,18 +158,14 @@ export function AppSidebar() {
               <Toggle
                 variant="outline"
                 size="sm"
-                pressed={theme === "dark"}
-                onPressedChange={(pressed) =>
-                  setTheme(pressed ? "dark" : "light")
-                }
+                pressed={theme === 'dark'}
+                onPressedChange={(pressed) => setTheme(pressed ? 'dark' : 'light')}
                 aria-label="Toggle dark mode"
               >
                 <SunIcon className="!hidden dark:!block" />
                 <MoonIcon className="dark:!hidden" />
               </Toggle>
-              <span className="text-sm text-muted-foreground">
-                {theme === "dark" ? "Dark" : "Light"}
-              </span>
+              <span className="text-sm text-muted-foreground">{theme === 'dark' ? 'Dark' : 'Light'}</span>
             </div>
           </SidebarMenuItem>
           <SidebarMenuItem>

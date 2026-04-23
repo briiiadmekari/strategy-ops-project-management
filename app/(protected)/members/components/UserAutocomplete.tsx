@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useState, useRef, useEffect, useMemo } from "react";
-import { useDebounce } from "@uidotdev/usehooks";
-import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
-import { CheckIcon, ChevronsUpDownIcon, LoaderIcon } from "lucide-react";
-import type { MasterUser } from "../services/member.service";
+import { useState, useRef, useEffect, useMemo } from 'react';
+import { useDebounce } from '@uidotdev/usehooks';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
+import { CheckIcon, ChevronsUpDownIcon, LoaderIcon } from 'lucide-react';
+import { MasterUser } from '../composables/interface';
 
 interface UserAutocompleteProps {
   users: MasterUser[];
@@ -14,28 +14,25 @@ interface UserAutocompleteProps {
   placeholder?: string;
   disabled?: boolean;
   isLoading?: boolean;
-  "aria-invalid"?: boolean;
+  'aria-invalid'?: boolean;
 }
 
 export function UserAutocomplete({
   users,
   value,
   onChange,
-  placeholder = "Search users...",
+  placeholder = 'Search users...',
   disabled = false,
   isLoading = false,
-  "aria-invalid": ariaInvalid,
+  'aria-invalid': ariaInvalid,
 }: UserAutocompleteProps) {
   const [open, setOpen] = useState(false);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
   const debouncedSearch = useDebounce(search, 300);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const selectedUser = useMemo(
-    () => users.find((u) => u.id === value),
-    [users, value]
-  );
+  const selectedUser = useMemo(() => users.find((u) => u.id === value), [users, value]);
 
   const filtered = useMemo(() => {
     if (!debouncedSearch) return users;
@@ -44,31 +41,25 @@ export function UserAutocomplete({
       (u) =>
         u.name.toLowerCase().includes(lower) ||
         u.email.toLowerCase().includes(lower) ||
-        u.id.toLowerCase().includes(lower)
+        u.id.toLowerCase().includes(lower),
     );
   }, [users, debouncedSearch]);
 
-  const visibleItems = useMemo(
-    () => filtered.slice(0, 50),
-    [filtered]
-  );
+  const visibleItems = useMemo(() => filtered.slice(0, 50), [filtered]);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(e.target as Node)
-      ) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setOpen(false);
       }
     }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   function handleSelect(user: MasterUser) {
     onChange(user.id);
-    setSearch("");
+    setSearch('');
     setOpen(false);
   }
 
@@ -76,7 +67,7 @@ export function UserAutocomplete({
     if (disabled) return;
     setOpen((prev) => {
       if (prev) return false;
-      setSearch("");
+      setSearch('');
       return true;
     });
   }
@@ -88,13 +79,10 @@ export function UserAutocomplete({
 
   return (
     <div ref={containerRef} className="relative">
-      <div
-        className="relative cursor-pointer"
-        onClick={handleToggle}
-      >
+      <div className="relative cursor-pointer" onClick={handleToggle}>
         <Input
           ref={inputRef}
-          value={open ? search : selectedUser?.name ?? ""}
+          value={open ? search : (selectedUser?.name ?? '')}
           onChange={handleInputChange}
           placeholder={selectedUser ? selectedUser.name : placeholder}
           disabled={disabled}
@@ -113,43 +101,36 @@ export function UserAutocomplete({
         <div className="absolute z-50 mt-1 w-full rounded-md border bg-popover text-popover-foreground shadow-md">
           <div className="max-h-60 overflow-y-auto p-1">
             {visibleItems.length === 0 ? (
-              <div className="px-3 py-6 text-center text-sm text-muted-foreground">
-                No users found.
-              </div>
+              <div className="px-3 py-6 text-center text-sm text-muted-foreground">No users found.</div>
             ) : (
               <>
                 {visibleItems.map((user) => (
-                <button
-                  key={user.id}
-                  type="button"
-                  className={cn(
-                    "group/item flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left text-sm hover:bg-primary-foreground cursor-pointer transition-colors",
-                    value === user.id && "bg-accent"
-                  )}
-                  onClick={() => handleSelect(user)}
-                >
-                  <CheckIcon
+                  <button
+                    key={user.id}
+                    type="button"
                     className={cn(
-                      "size-4 shrink-0",
-                      value === user.id ? "opacity-100" : "opacity-0"
+                      'group/item flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left text-sm hover:bg-primary-foreground cursor-pointer transition-colors',
+                      value === user.id && 'bg-accent',
                     )}
-                  />
-                  <div className="flex flex-col gap-0.5 min-w-0">
-                    <span className="font-medium truncate">{user.name}</span>
-                    <span className="text-xs text-foreground/60 group-hover/item:text-foreground/60 truncate">
-                      {user.email}
-                    </span>
-                    <span className="text-xs text-foreground/40 group-hover/item:text-foreground/40 truncate font-mono">
-                      {user.id}
-                    </span>
+                    onClick={() => handleSelect(user)}
+                  >
+                    <CheckIcon className={cn('size-4 shrink-0', value === user.id ? 'opacity-100' : 'opacity-0')} />
+                    <div className="flex flex-col gap-0.5 min-w-0">
+                      <span className="font-medium truncate">{user.name}</span>
+                      <span className="text-xs text-foreground/60 group-hover/item:text-foreground/60 truncate">
+                        {user.email}
+                      </span>
+                      <span className="text-xs text-foreground/40 group-hover/item:text-foreground/40 truncate font-mono">
+                        {user.id}
+                      </span>
+                    </div>
+                  </button>
+                ))}
+                {filtered.length > 50 && (
+                  <div className="px-3 py-2 text-center text-xs text-muted-foreground">
+                    Showing 50 of {filtered.length} results. Type to narrow down.
                   </div>
-                </button>
-              ))}
-              {filtered.length > 50 && (
-                <div className="px-3 py-2 text-center text-xs text-muted-foreground">
-                  Showing 50 of {filtered.length} results. Type to narrow down.
-                </div>
-              )}
+                )}
               </>
             )}
           </div>

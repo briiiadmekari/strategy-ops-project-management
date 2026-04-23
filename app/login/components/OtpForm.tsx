@@ -1,16 +1,10 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSlot,
-  InputOTPSeparator,
-} from "@/components/ui/input-otp";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Spinner } from "@/components/ui/spinner";
-import { OctagonAlertIcon } from "lucide-react";
-import { REGEXP_ONLY_DIGITS } from "input-otp";
+import { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator } from '@/components/ui/input-otp';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { OctagonAlertIcon, ArrowLeft } from 'lucide-react';
+import { REGEXP_ONLY_DIGITS } from 'input-otp';
+import { CustomButton } from '@/components/CustomButton';
 
 interface OtpFormProps {
   email: string;
@@ -38,22 +32,12 @@ export function OtpForm({
   return (
     <form onSubmit={onSubmit} className="w-full space-y-4">
       <div className="text-center mb-2">
-        <p className="text-sm text-muted-foreground">
-          We sent a 6-digit code to
-        </p>
-        <p className="text-sm font-semibold text-primary mt-0.5 break-all">
-          {email}
-        </p>
+        <p className="text-sm text-muted-foreground">We sent a 6-digit code to</p>
+        <p className="text-sm font-semibold text-primary mt-0.5 break-all">{email}</p>
       </div>
 
       <div className="flex justify-center">
-        <InputOTP
-          maxLength={6}
-          value={otp}
-          onChange={onOtpChange}
-          disabled={isPending}
-          pattern={REGEXP_ONLY_DIGITS}
-        >
+        <InputOTP maxLength={6} value={otp} onChange={onOtpChange} disabled={isPending} pattern={REGEXP_ONLY_DIGITS}>
           <InputOTPGroup>
             <InputOTPSlot index={0} />
             <InputOTPSlot index={1} />
@@ -75,37 +59,35 @@ export function OtpForm({
         </Alert>
       )}
 
-      <Button
+      <CustomButton
+        title={isPending ? 'Verifying...' : 'Verify & Sign In'}
         type="submit"
-        className="w-full"
+        variant="default"
         size="lg"
+        isPending={isPending}
         disabled={isPending || otp.length < 6}
-      >
-        {isPending ? <Spinner className="size-4" /> : "Verify & Sign In"}
-      </Button>
+        className="w-full"
+      />
 
       <div className="text-center space-y-2 pt-1">
-        <Button
+        <CustomButton
+          title={countdown > 0 ? `Resend available in ${countdown}s` : "Didn't receive a code? Resend"}
           type="button"
           variant="ghost"
           size="sm"
           onClick={onResend}
           disabled={countdown > 0 || isPending}
-        >
-          {countdown > 0
-            ? `Resend available in ${countdown}s`
-            : "Didn't receive a code? Resend"}
-        </Button>
+        />
 
         <div>
-          <Button
+          <CustomButton
+            title="Use a different email"
             type="button"
             variant="link"
             size="sm"
             onClick={onBackToEmail}
-          >
-            ← Use a different email
-          </Button>
+            leftIcon={<ArrowLeft size={8} />}
+          />
         </div>
       </div>
     </form>

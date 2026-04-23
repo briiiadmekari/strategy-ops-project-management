@@ -1,16 +1,20 @@
-import { useMemo, useState } from "react";
-import { useMyTasks } from "@/composables/queries";
-import type { TaskStatus } from "@/constant/task";
+import { useMemo, useState } from 'react';
+import { useMyTasks } from '../composables/queries';
+import type { TaskStatus } from '@/constant/task';
 
 export function useMyTasksPage() {
   const [status, setStatus] = useState<TaskStatus | undefined>();
   const [assigneeId, setAssigneeId] = useState<string | undefined>();
-  const [sortByDueDate, setSortByDueDate] = useState<
-    "asc" | "desc" | undefined
-  >();
+  const [sortByDueDate, setSortByDueDate] = useState<'asc' | 'desc' | undefined>();
   const [selectedTag, setSelectedTag] = useState<string | undefined>();
 
-  const tasksQuery = useMyTasks({
+  const {
+    data: myTasksQueries,
+    isPending,
+    isLoading,
+    isError,
+    error,
+  } = useMyTasks({
     page: 1,
     limit: 1000,
     status,
@@ -18,15 +22,10 @@ export function useMyTasksPage() {
     sort_by_due_date: sortByDueDate,
   });
 
-  const allTasks = tasksQuery.data?.data?.items ?? [];
-
-  const tasks = useMemo(
-    () =>
-      selectedTag
-        ? allTasks.filter((t) => t.tags?.includes(selectedTag))
-        : allTasks,
-    [allTasks, selectedTag],
-  );
+  const tasks = useMemo(() => {
+    const allTasks = myTasksQueries?.data?.items ?? [];
+    return selectedTag ? allTasks.filter((t) => t.tags?.includes(selectedTag)) : allTasks;
+  }, [myTasksQueries?.data?.items, selectedTag]);
 
   function handleStatusChange(value: TaskStatus | undefined) {
     setStatus(value);
@@ -36,7 +35,7 @@ export function useMyTasksPage() {
     setAssigneeId(value);
   }
 
-  function handleSortByDueDateChange(value: "asc" | "desc" | undefined) {
+  function handleSortByDueDateChange(value: 'asc' | 'desc' | undefined) {
     setSortByDueDate(value);
   }
 
@@ -54,8 +53,8 @@ export function useMyTasksPage() {
     handleAssigneeChange,
     handleSortByDueDateChange,
     handleTagChange,
-    isLoading: tasksQuery.isLoading,
-    isError: tasksQuery.isError,
-    error: tasksQuery.error,
+    isLoading: isPending || isLoading,
+    isError,
+    error,
   };
 }

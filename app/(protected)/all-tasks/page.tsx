@@ -1,9 +1,11 @@
-"use client";
+'use client';
 
-import { GroupedTaskTable, TaskFilter, CreateTaskDialog } from "@/components/tasks";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { OctagonAlertIcon } from "lucide-react";
-import { useAllTasksPage } from "./hooks/useAllTasksPage";
+import { GroupedTaskTable } from '@/components/GroupedTaskTable';
+import { TaskFilter } from '@/components/TaskFilter';
+import { CreateTaskDialog } from '@/components/CreateTaskDialog';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { OctagonAlertIcon } from 'lucide-react';
+import { useAllTasksPage } from './hooks/useAllTasksPage';
 
 export default function AllTasksPage() {
   const {
@@ -28,9 +30,7 @@ export default function AllTasksPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">All Tasks</h1>
-          <p className="text-sm text-muted-foreground">
-            All tasks across the team.
-          </p>
+          <p className="text-sm text-muted-foreground">All tasks across the team.</p>
         </div>
         <CreateTaskDialog />
       </div>
@@ -38,9 +38,7 @@ export default function AllTasksPage() {
       {isError && (
         <Alert variant="destructive">
           <OctagonAlertIcon />
-          <AlertDescription>
-            {error?.message ?? "Failed to load tasks."}
-          </AlertDescription>
+          <AlertDescription>{error?.message ?? 'Failed to load tasks.'}</AlertDescription>
         </Alert>
       )}
 

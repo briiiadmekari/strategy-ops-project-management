@@ -1,26 +1,15 @@
-"use client";
+'use client';
 
-import { use, useState } from "react";
-import Link from "next/link";
+import { use, useState } from 'react';
+import Link from 'next/link';
 
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,24 +20,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { GroupedTaskTable, TaskFilter, CreateTaskDialog } from "@/components/tasks";
-import {
-  ArrowLeftIcon,
-  OctagonAlertIcon,
-  TrashIcon,
-  UserPlusIcon,
-  XIcon,
-  PencilIcon,
-  CheckIcon,
-} from "lucide-react";
-import { useFolderPage } from "./hooks/useFolderPage";
+} from '@/components/ui/alert-dialog';
+import { GroupedTaskTable } from '@/components/GroupedTaskTable';
+import { TaskFilter } from '@/components/TaskFilter';
+import { CreateTaskDialog } from '@/components/CreateTaskDialog';
+import { ArrowLeftIcon, OctagonAlertIcon, TrashIcon, UserPlusIcon, XIcon, PencilIcon, CheckIcon } from 'lucide-react';
+import { useFolderPage } from './hooks/useFolderPage';
 
-export default function FolderDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default function FolderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const {
     folder,
@@ -94,9 +73,7 @@ export default function FolderDetailPage({
         </Button>
         <Alert variant="destructive">
           <OctagonAlertIcon />
-          <AlertDescription>
-            {error?.message ?? "Failed to load folder."}
-          </AlertDescription>
+          <AlertDescription>{error?.message ?? 'Failed to load folder.'}</AlertDescription>
         </Alert>
       </div>
     );
@@ -117,9 +94,7 @@ export default function FolderDetailPage({
   }
 
   // Members not in the folder yet (for adding)
-  const availableMembers = members.filter(
-    (m) => !folder.members.some((fm) => fm.id === m.id),
-  );
+  const availableMembers = members.filter((m) => !folder.members.some((fm) => fm.id === m.id));
 
   return (
     <div className="space-y-6">
@@ -132,11 +107,7 @@ export default function FolderDetailPage({
               Back
             </Link>
           </Button>
-          <FolderNameEditor
-            name={folder.name}
-            isCreator={isCreator}
-            onRename={handleRenameFolder}
-          />
+          <FolderNameEditor name={folder.name} isCreator={isCreator} onRename={handleRenameFolder} />
         </div>
         <div className="flex items-center gap-2">
           <CreateTaskDialog defaultFolders={[{ id: folder.id, name: folder.name }]} />
@@ -157,9 +128,7 @@ export default function FolderDetailPage({
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDeleteFolder}>
-                    Delete
-                  </AlertDialogAction>
+                  <AlertDialogAction onClick={handleDeleteFolder}>Delete</AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
@@ -206,9 +175,7 @@ export default function FolderDetailPage({
               </Select>
             )}
 
-            {folder.members.length === 0 && (
-              <p className="text-sm text-muted-foreground">No members added yet.</p>
-            )}
+            {folder.members.length === 0 && <p className="text-sm text-muted-foreground">No members added yet.</p>}
           </div>
         </CardContent>
       </Card>
@@ -246,9 +213,7 @@ function FolderNameEditor({
   const [value, setValue] = useState(name);
 
   if (!isCreator) {
-    return (
-      <h1 className="text-2xl font-semibold tracking-tight">{name}</h1>
-    );
+    return <h1 className="text-2xl font-semibold tracking-tight">{name}</h1>;
   }
 
   if (editing) {
@@ -260,11 +225,11 @@ function FolderNameEditor({
           className="text-2xl font-semibold h-10 w-64"
           autoFocus
           onKeyDown={(e) => {
-            if (e.key === "Enter") {
+            if (e.key === 'Enter') {
               onRename(value);
               setEditing(false);
             }
-            if (e.key === "Escape") {
+            if (e.key === 'Escape') {
               setValue(name);
               setEditing(false);
             }

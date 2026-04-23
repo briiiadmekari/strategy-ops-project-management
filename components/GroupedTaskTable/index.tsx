@@ -1,27 +1,18 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import Link from "next/link";
-import { format } from "date-fns";
+import { useState } from 'react';
+import Link from 'next/link';
+import { format } from 'date-fns';
 
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Skeleton } from "@/components/ui/skeleton";
-import { DeleteTaskDialog } from "@/components/tasks/DeleteTaskDialog";
-import {
-  ChevronDownIcon,
-  ChevronRightIcon,
-  EyeIcon,
-  Hexagon
-} from "lucide-react";
-import { cn } from "@/lib/utils";
-import type { Task, Subtask } from "@/types/task";
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Skeleton } from '@/components/ui/skeleton';
+import { DeleteTaskDialog } from '@/components/DeleteTaskDialog';
+import { ChevronDownIcon, ChevronRightIcon, EyeIcon, Hexagon } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import type { Task, Subtask } from '@/types/task';
 import {
   TASK_STATUSES,
   TASK_STATUS_LABELS,
@@ -33,24 +24,24 @@ import {
   type TaskTag,
   TASK_ICON_COLORS,
   TASK_ICON_BORDER_COLORS,
-} from "@/constant/task";
+} from '@/constant/task';
 
 function getInitials(name: string): string {
   return name
-    .split(" ")
+    .split(' ')
     .map((part) => part[0])
     .filter(Boolean)
     .slice(0, 2)
-    .join("")
+    .join('')
     .toUpperCase();
 }
 
 function formatDate(value: string | number | null): string {
-  if (!value) return "—";
+  if (!value) return '—';
   try {
-    return format(new Date(value), "dd/MM/yyyy");
+    return format(new Date(value), 'dd/MM/yyyy');
   } catch {
-    return "—";
+    return '—';
   }
 }
 
@@ -79,11 +70,7 @@ export function GroupedTaskTable({ data, isLoading }: GroupedTaskTableProps) {
   }
 
   if (data.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-24 text-sm text-muted-foreground">
-        No tasks found.
-      </div>
-    );
+    return <div className="flex items-center justify-center h-24 text-sm text-muted-foreground">No tasks found.</div>;
   }
 
   return (
@@ -117,32 +104,20 @@ function StatusGroup({ status, tasks }: { status: TaskStatus; tasks: Task[] }) {
 
   return (
     <>
-      <tr
-        className=" hover:bg-muted/50 transition-colors cursor-pointer"
-        onClick={() => setExpanded((prev) => !prev)}
-      >
+      <tr className=" hover:bg-muted/50 transition-colors cursor-pointer" onClick={() => setExpanded((prev) => !prev)}>
         <td colSpan={9} className="px-4 py-2.5">
           <div className="flex items-center gap-3">
-            <ChevronDownIcon
-              className={cn(
-                "size-4 transition-transform",
-                !expanded && "-rotate-90",
-              )}
-            />
-            <Badge
-              variant="secondary"
-              className={cn("text-xs", TASK_STATUS_COLORS[status])}
-            >
+            <ChevronDownIcon className={cn('size-4 transition-transform', !expanded && '-rotate-90')} />
+            <Badge variant="secondary" className={cn('text-xs', TASK_STATUS_COLORS[status])}>
               {TASK_STATUS_LABELS[status]}
             </Badge>
             <span className="text-xs text-muted-foreground">
-              {tasks.length} task{tasks.length !== 1 && "s"}
+              {tasks.length} task{tasks.length !== 1 && 's'}
             </span>
           </div>
         </td>
       </tr>
-      {expanded &&
-        tasks.map((task) => <TaskRow key={task.id} task={task} status={status} />)}
+      {expanded && tasks.map((task) => <TaskRow key={task.id} task={task} status={status} />)}
     </>
   );
 }
@@ -157,45 +132,30 @@ function TaskRow({ task, status }: { task: Task; status: TaskStatus }) {
         {/* Expand subtasks */}
         <td className="px-2">
           {hasSubtasks ? (
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              onClick={() => setSubtasksExpanded((prev) => !prev)}
-            >
-              <ChevronRightIcon
-                className={cn(
-                  "size-4 transition-transform",
-                  subtasksExpanded && "rotate-90",
-                )}
-              />
+            <Button variant="ghost" size="icon-sm" onClick={() => setSubtasksExpanded((prev) => !prev)}>
+              <ChevronRightIcon className={cn('size-4 transition-transform', subtasksExpanded && 'rotate-90')} />
             </Button>
           ) : null}
         </td>
         {/* Title */}
         <td className="flex items-center gap-2 py-2.5 px-4 text-sm">
           <div className="relative inline-block">
-            <Hexagon className={cn("size-6", TASK_ICON_BORDER_COLORS[status])} />
-            <Hexagon 
+            <Hexagon className={cn('size-6', TASK_ICON_BORDER_COLORS[status])} />
+            <Hexagon
               className={cn(
-                "size-4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2", 
-                TASK_ICON_COLORS[status]
-              )} 
+                'size-4 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2',
+                TASK_ICON_COLORS[status],
+              )}
             />
           </div>
-          <Link
-            href={`/tasks/${task.id}`}
-            className="font-medium hover:underline"
-          >
+          <Link href={`/tasks/${task.id}`} className="font-medium hover:underline">
             {task.title}
           </Link>
         </td>
         {/* Priority */}
         <td className="py-2.5 px-3">
           {task.priority ? (
-            <Badge
-              variant="secondary"
-              className={cn("text-xs", TASK_PRIORITY_COLORS[task.priority])}
-            >
+            <Badge variant="secondary" className={cn('text-xs', TASK_PRIORITY_COLORS[task.priority])}>
               {TASK_PRIORITY_LABELS[task.priority]}
             </Badge>
           ) : (
@@ -218,13 +178,9 @@ function TaskRow({ task, status }: { task: Task; status: TaskStatus }) {
           )}
         </td>
         {/* Start Date */}
-        <td className="py-2.5 px-3 text-sm text-muted-foreground">
-          {formatDate(task.start_date)}
-        </td>
+        <td className="py-2.5 px-3 text-sm text-muted-foreground">{formatDate(task.start_date)}</td>
         {/* Due Date */}
-        <td className="py-2.5 px-3 text-sm text-muted-foreground">
-          {formatDate(task.due_date)}
-        </td>
+        <td className="py-2.5 px-3 text-sm text-muted-foreground">{formatDate(task.due_date)}</td>
         {/* Tags */}
         <td className="py-2.5 px-3">
           {task.tags && task.tags.length > 0 ? (
@@ -233,10 +189,7 @@ function TaskRow({ task, status }: { task: Task; status: TaskStatus }) {
                 <Badge
                   key={tag}
                   variant="secondary"
-                  className={cn(
-                    "text-xs capitalize",
-                    TASK_TAG_COLORS[tag as TaskTag] ?? "bg-zinc-100 text-zinc-600",
-                  )}
+                  className={cn('text-xs capitalize', TASK_TAG_COLORS[tag as TaskTag] ?? 'bg-zinc-100 text-zinc-600')}
                 >
                   {tag}
                 </Badge>
@@ -252,9 +205,7 @@ function TaskRow({ task, status }: { task: Task; status: TaskStatus }) {
           )}
         </td>
         {/* Created At */}
-        <td className="py-2.5 px-3 text-sm text-muted-foreground">
-          {formatDate(task.created_at)}
-        </td>
+        <td className="py-2.5 px-3 text-sm text-muted-foreground">{formatDate(task.created_at)}</td>
         {/* Actions */}
         <td className="py-2.5 px-3 text-right">
           <div className="flex items-center gap-1 justify-end">
@@ -269,9 +220,7 @@ function TaskRow({ task, status }: { task: Task; status: TaskStatus }) {
       </tr>
       {/* Subtask rows */}
       {subtasksExpanded &&
-        task.subtasks?.map((subtask, i) => (
-          <SubtaskRow key={subtask.id ?? `sub-${i}`} subtask={subtask} />
-        ))}
+        task.subtasks?.map((subtask, i) => <SubtaskRow key={subtask.id ?? `sub-${i}`} subtask={subtask} />)}
     </>
   );
 }
@@ -283,18 +232,13 @@ function SubtaskRow({ subtask }: { subtask: Subtask }) {
       <td />
       {/* title — indented */}
       <td className="flex items-center gap-2 py-2 px-4 pl-10 ">
-        <Hexagon className={cn("size-3", TASK_ICON_COLORS[subtask.status])} />
-        <span className="text-sm text-muted-foreground">
-          {subtask.title}
-        </span>
+        <Hexagon className={cn('size-3', TASK_ICON_COLORS[subtask.status])} />
+        <span className="text-sm text-muted-foreground">{subtask.title}</span>
       </td>
       {/* priority */}
       <td className="py-2 px-3">
         {subtask.priority ? (
-          <Badge
-            variant="secondary"
-            className={cn("text-xs", TASK_PRIORITY_COLORS[subtask.priority])}
-          >
+          <Badge variant="secondary" className={cn('text-xs', TASK_PRIORITY_COLORS[subtask.priority])}>
             {TASK_PRIORITY_LABELS[subtask.priority]}
           </Badge>
         ) : (
@@ -303,7 +247,7 @@ function SubtaskRow({ subtask }: { subtask: Subtask }) {
       </td>
       {/* remaining cols empty */}
       <td />
-      
+
       <td />
       <td />
       <td />

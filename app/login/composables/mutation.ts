@@ -1,6 +1,6 @@
-import { useMutation } from "@tanstack/react-query";
-import { loginService } from "../services/login.service";
-import type { RequestOtpInput, VerifyOtpInput } from "../schema/loginSchema";
+import { useMutation } from '@tanstack/react-query';
+import { loginService } from '@/services/login.service';
+import type { RequestOtpInput, VerifyOtpInput } from '../schema/loginSchema';
 
 export function useRequestOtp() {
   return useMutation({
