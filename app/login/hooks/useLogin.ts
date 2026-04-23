@@ -22,8 +22,8 @@ export const useLogin = () => {
   const [error, setError] = useState<string | null>(null);
 
   const { countdown, start: startCountdown } = useCountdown();
-  const { mutate: requestOtp, isPending: isRequestOtpPending } = useRequestOtp();
-  const { mutate: verifyOtp, isPending: isVerifyOtpPending } = useVerifyOtp();
+  const { mutate: requestOtp, isPending: isRequestOtpPending, isError: isRequestOtpError } = useRequestOtp();
+  const { mutate: verifyOtp, isPending: isVerifyOtpPending, isError: isVerifyOtpError } = useVerifyOtp();
 
   const handleRequestOtp = (e?: React.FormEvent) => {
     e?.preventDefault();

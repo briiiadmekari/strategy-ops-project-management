@@ -1,33 +1,39 @@
-import { useMemo, useState } from "react";
-import { useTaskLogs, useMembers } from "@/composables/queries";
+import { useMemo, useState } from 'react';
+import { useTaskLogs, useMembers } from '@/composables/queries';
 
 export function useLogsPage() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [assigneeId, setAssigneeId] = useState<string | undefined>();
-  const [sortByDueDate, setSortByDueDate] = useState<
-    "asc" | "desc" | undefined
-  >();
+  const [sortByDueDate, setSortByDueDate] = useState<'asc' | 'desc' | undefined>();
   const [selectedTag, setSelectedTag] = useState<string | undefined>();
 
-  const logsQuery = useTaskLogs({
+  const {
+    data: logsData,
+    isPending: isLogsPending,
+    isLoading,
+    isError,
+    error,
+  } = useTaskLogs({
     page,
     limit,
     assignee_id: assigneeId,
     sort_by_due_date: sortByDueDate,
   });
 
-  const membersQuery = useMembers();
+  const {
+    data: membersData,
+    isPending: isMembersPending,
+    isLoading: isMembersLoading,
+    isError: isMembersError,
+  } = useMembers();
 
-  const allLogs = logsQuery.data?.data?.items ?? [];
-  const totalPages = logsQuery.data?.data?.total_pages ?? 1;
-  const members = membersQuery.data?.data ?? [];
+  const allLogs = logsData?.data?.items ?? [];
+  const totalPages = logsData?.data?.total_pages ?? 1;
+  const members = membersData?.data ?? [];
 
   const logs = useMemo(
-    () =>
-      selectedTag
-        ? allLogs.filter((l) => l.tags?.includes(selectedTag))
-        : allLogs,
+    () => (selectedTag ? allLogs.filter((l) => l.tags?.includes(selectedTag)) : allLogs),
     [allLogs, selectedTag],
   );
 
@@ -36,7 +42,7 @@ export function useLogsPage() {
     setPage(1);
   }
 
-  function handleSortByDueDateChange(value: "asc" | "desc" | undefined) {
+  function handleSortByDueDateChange(value: 'asc' | 'desc' | undefined) {
     setSortByDueDate(value);
     setPage(1);
   }
@@ -60,9 +66,9 @@ export function useLogsPage() {
     handleAssigneeChange,
     handleSortByDueDateChange,
     handleTagChange,
-    isLoading: logsQuery.isLoading,
-    isError: logsQuery.isError,
-    error: logsQuery.error,
-    isMembersLoading: membersQuery.isLoading,
+    isLoading,
+    isError,
+    error,
+    isMembersLoading,
   };
 }

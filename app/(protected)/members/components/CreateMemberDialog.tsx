@@ -1,66 +1,27 @@
 'use client';
 
-import { useState } from 'react';
-import { toast } from 'sonner';
-import { AxiosError } from 'axios';
+import { Controller } from 'react-hook-form';
 
 import { Button } from '@/components/ui/button';
 import { CustomDialog } from '@/components/CustomDialog';
 import { Label } from '@/components/ui/label';
 import { PlusIcon } from 'lucide-react';
 
-import { createMemberSchema } from '../schema/memberSchema';
-import { useCreateMember } from '../composables/mutations';
-import { useUsers } from '../composables/queries';
 import { UserAutocomplete } from './UserAutocomplete';
+import { useCreateMemberForm } from '../hooks/useCreateMemberForm';
 
 export function CreateMemberDialog() {
-  const [open, setOpen] = useState(false);
-  const [selectedUserId, setSelectedUserId] = useState<string | undefined>();
-  const [error, setError] = useState<string | null>(null);
+  const { open, form, users, isUsersLoading, isPending, handleOpenChange, handleSubmit } = useCreateMemberForm();
 
-  const createMember = useCreateMember();
-  const { data: usersData, isLoading: isUsersLoading } = useUsers(open);
-  const users = usersData?.data ?? [];
-
-  function resetForm() {
-    setSelectedUserId(undefined);
-    setError(null);
-  }
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError(null);
-
-    const result = createMemberSchema.safeParse({ user_id: selectedUserId });
-    if (!result.success) {
-      setError(result.error.issues[0]?.message ?? 'Please select a user');
-      return;
-    }
-
-    createMember.mutate(result.data, {
-      onSuccess: () => {
-        toast.success('Member added');
-        setOpen(false);
-        resetForm();
-      },
-      onError: (err) => {
-        if (err instanceof AxiosError) {
-          toast.error(err.response?.data?.message ?? 'Failed to add member');
-        } else {
-          toast.error('An unexpected error occurred');
-        }
-      },
-    });
-  }
+  const {
+    control,
+    formState: { errors },
+  } = form;
 
   return (
     <CustomDialog
       open={open}
-      onOpenChange={(value) => {
-        setOpen(value);
-        if (!value) resetForm();
-      }}
+      onOpenChange={handleOpenChange}
       trigger={
         <Button size="sm">
           <PlusIcon />
@@ -71,20 +32,26 @@ export function CreateMemberDialog() {
       description="Search and select a user to add to the team."
       onSubmit={handleSubmit}
       submitLabel="Add Member"
-      isPending={createMember.isPending}
+      isPending={isPending}
     >
       <div className="space-y-2">
         <Label>User</Label>
-        <UserAutocomplete
-          users={users}
-          value={selectedUserId}
-          onChange={setSelectedUserId}
-          placeholder={isUsersLoading ? 'Loading users...' : 'Search users...'}
-          disabled={isUsersLoading}
-          isLoading={isUsersLoading}
-          aria-invalid={!!error}
+        <Controller
+          control={control}
+          name="user_id"
+          render={({ field }) => (
+            <UserAutocomplete
+              users={users}
+              value={field.value || undefined}
+              onChange={(val) => field.onChange(val ?? '')}
+              placeholder={isUsersLoading ? 'Loading users...' : 'Search users...'}
+              disabled={isUsersLoading}
+              isLoading={isUsersLoading}
+              aria-invalid={!!errors.user_id}
+            />
+          )}
         />
-        {error && <p className="text-xs text-destructive">{error}</p>}
+        {errors.user_id && <p className="text-xs text-destructive">{errors.user_id.message}</p>}
       </div>
     </CustomDialog>
   );

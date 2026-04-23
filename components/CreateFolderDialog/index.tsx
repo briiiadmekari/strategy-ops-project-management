@@ -1,28 +1,25 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
-import { PlusIcon, XIcon } from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { CustomDialog } from "@/components/CustomDialog";
-import { CustomInput } from "@/components/CustomInput";
-import { useCreateFolderForm } from "./hooks/useCreateFolderForm";
+import { Controller } from 'react-hook-form';
+import { Button } from '@/components/ui/button';
+import { PlusIcon, XIcon } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { CustomDialog } from '@/components/CustomDialog';
+import { CustomInput } from '@/components/CustomInput';
+import { useCreateFolderForm } from './hooks/useCreateFolderForm';
 
 export function CreateFolderDialog() {
-  const {
-    open,
-    form,
-    errors,
-    members,
-    isPending,
-    handleOpenChange,
-    updateForm,
-    toggleMember,
-    handleSubmit,
-  } = useCreateFolderForm();
+  const { open, form, members, isPending, handleOpenChange, toggleMember, handleSubmit } = useCreateFolderForm();
 
-  const selectedIds = new Set((form.members ?? []).map((m) => m.id));
+  const {
+    control,
+    watch,
+    formState: { errors },
+  } = form;
+  const watchedMembers = watch('members') ?? [];
+  const selectedIds = new Set(watchedMembers.map((m) => m.id));
 
   return (
     <CustomDialog
@@ -40,26 +37,28 @@ export function CreateFolderDialog() {
       isPending={isPending}
       onCancel={() => handleOpenChange(false)}
     >
-      <CustomInput
-        label="Folder Name"
-        value={form.name}
-        onChange={(e) => updateForm({ name: e.target.value })}
-        placeholder="Enter folder name"
-        error={errors.name}
+      <Controller
+        control={control}
+        name="name"
+        render={({ field }) => (
+          <CustomInput
+            label="Folder Name"
+            value={field.value}
+            onChange={field.onChange}
+            placeholder="Enter folder name"
+            error={errors.name?.message}
+          />
+        )}
       />
 
       <div className="space-y-2">
         <Label>Members</Label>
-        {form.members && form.members.length > 0 && (
+        {watchedMembers.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mb-2">
-            {form.members.map((m) => (
+            {watchedMembers.map((m) => (
               <Badge key={m.id} variant="secondary" className="gap-1">
                 {m.name}
-                <button
-                  type="button"
-                  onClick={() => toggleMember(m.id)}
-                  className="ml-0.5 hover:text-destructive"
-                >
+                <button type="button" onClick={() => toggleMember(m.id)} className="ml-0.5 hover:text-destructive">
                   <XIcon className="size-3" />
                 </button>
               </Badge>
@@ -73,20 +72,13 @@ export function CreateFolderDialog() {
                 key={member.id}
                 className="flex items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-accent cursor-pointer"
               >
-                <Checkbox
-                  checked={selectedIds.has(member.id)}
-                  onCheckedChange={() => toggleMember(member.id)}
-                />
+                <Checkbox checked={selectedIds.has(member.id)} onCheckedChange={() => toggleMember(member.id)} />
                 <span>{member.name}</span>
-                <span className="text-xs text-muted-foreground ml-auto">
-                  {member.email}
-                </span>
+                <span className="text-xs text-muted-foreground ml-auto">{member.email}</span>
               </label>
             ))
           ) : (
-            <p className="text-sm text-muted-foreground text-center py-2">
-              No members available
-            </p>
+            <p className="text-sm text-muted-foreground text-center py-2">No members available</p>
           )}
         </div>
       </div>

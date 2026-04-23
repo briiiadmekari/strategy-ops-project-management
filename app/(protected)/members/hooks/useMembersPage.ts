@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useMembers } from "../composables/queries";
+import { useMembers } from '../composables/queries';
 
 export function useMembersPage() {
-  const { data, isLoading, isError, error } = useMembers();
+  const { data: membersData, isPending, isLoading, isError, error } = useMembers();
 
-  const members = data?.data ?? [];
+  const members = membersData?.data ?? [];
 
   return {
     members,

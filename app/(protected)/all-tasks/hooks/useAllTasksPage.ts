@@ -1,16 +1,20 @@
-import { useMemo, useState } from "react";
-import { useAllTasks, useMembers } from "@/composables/queries";
-import type { TaskStatus } from "@/constant/task";
+import { useMemo, useState } from 'react';
+import { useAllTasks, useMembers } from '@/composables/queries';
+import type { TaskStatus } from '@/constant/task';
 
 export function useAllTasksPage() {
   const [status, setStatus] = useState<TaskStatus | undefined>();
   const [assigneeId, setAssigneeId] = useState<string | undefined>();
-  const [sortByDueDate, setSortByDueDate] = useState<
-    "asc" | "desc" | undefined
-  >();
+  const [sortByDueDate, setSortByDueDate] = useState<'asc' | 'desc' | undefined>();
   const [selectedTag, setSelectedTag] = useState<string | undefined>();
 
-  const tasksQuery = useAllTasks({
+  const {
+    data: tasksData,
+    isPending: isTasksPending,
+    isLoading,
+    isError,
+    error,
+  } = useAllTasks({
     page: 1,
     limit: 1000,
     status,
@@ -18,16 +22,18 @@ export function useAllTasksPage() {
     sort_by_due_date: sortByDueDate,
   });
 
-  const membersQuery = useMembers();
+  const {
+    data: membersData,
+    isPending: isMembersPending,
+    isLoading: isMembersLoading,
+    isError: isMembersError,
+  } = useMembers();
 
-  const allTasks = tasksQuery.data?.data?.items ?? [];
-  const members = membersQuery.data?.data ?? [];
+  const allTasks = tasksData?.data?.items ?? [];
+  const members = membersData?.data ?? [];
 
   const tasks = useMemo(
-    () =>
-      selectedTag
-        ? allTasks.filter((t) => t.tags?.includes(selectedTag))
-        : allTasks,
+    () => (selectedTag ? allTasks.filter((t) => t.tags?.includes(selectedTag)) : allTasks),
     [allTasks, selectedTag],
   );
 
@@ -39,7 +45,7 @@ export function useAllTasksPage() {
     setAssigneeId(value);
   }
 
-  function handleSortByDueDateChange(value: "asc" | "desc" | undefined) {
+  function handleSortByDueDateChange(value: 'asc' | 'desc' | undefined) {
     setSortByDueDate(value);
   }
 
@@ -58,9 +64,9 @@ export function useAllTasksPage() {
     handleAssigneeChange,
     handleSortByDueDateChange,
     handleTagChange,
-    isLoading: tasksQuery.isLoading,
-    isError: tasksQuery.isError,
-    error: tasksQuery.error,
-    isMembersLoading: membersQuery.isLoading,
+    isLoading,
+    isError,
+    error,
+    isMembersLoading,
   };
 }

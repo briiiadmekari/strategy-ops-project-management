@@ -1,97 +1,106 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { toast } from "sonner";
-import { AxiosError } from "axios";
+import { useState } from 'react';
+import { useForm, type UseFormReturn } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { toast } from 'sonner';
+import { AxiosError } from 'axios';
+import { z } from 'zod';
+import type { UseMutationResult } from '@tanstack/react-query';
 
-import { createFolderSchema, type CreateFolderInput } from "@/schema/folderSchema";
-import { useCreateFolder } from "@/composables/mutations";
-import { useMembers } from "@/composables/queries";
+import { createFolderSchema } from '@/schema/folderSchema';
+import { useCreateFolder } from '@/composables/mutations';
+import { useMembers } from '@/composables/queries';
+import type { ApiResponse } from '@/types/api';
+import type { Folder } from '@/types/folder';
 
-const INITIAL_FORM: CreateFolderInput = {
-  name: "",
+type CreateFolderForm = z.infer<typeof createFolderSchema>;
+
+const DEFAULT_VALUES: CreateFolderForm = {
+  name: '',
   members: [],
 };
 
+interface HandleCreateFolderParams {
+  form: UseFormReturn<CreateFolderForm>;
+  mutate: UseMutationResult<ApiResponse<Folder>, Error, CreateFolderForm, unknown>['mutate'];
+  setOpen: (open: boolean) => void;
+}
+
+async function handleCreateFolder({ form, mutate, setOpen }: HandleCreateFolderParams) {
+  const data = form.getValues();
+  mutate(data, {
+    onSuccess: () => {
+      toast.success('Folder created');
+      setOpen(false);
+      form.reset({ ...DEFAULT_VALUES });
+    },
+    onError: (err) => {
+      if (err instanceof AxiosError) {
+        toast.error(err.response?.data?.message ?? 'Failed to create folder');
+      } else {
+        toast.error('An unexpected error occurred');
+      }
+    },
+  });
+}
+
 export function useCreateFolderForm() {
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState<CreateFolderInput>({ ...INITIAL_FORM });
-  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const createFolder = useCreateFolder();
-  const { data: membersData } = useMembers();
+  const form = useForm<z.infer<typeof createFolderSchema>>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver(createFolderSchema as any),
+    defaultValues: { ...DEFAULT_VALUES },
+  });
+
+  const { mutate: createFolder, isPending, isError } = useCreateFolder();
+  const {
+    data: membersData,
+    isPending: isMembersPending,
+    isLoading: isMembersLoading,
+    isError: isMembersError,
+  } = useMembers();
   const members = membersData?.data ?? [];
 
-  function resetForm() {
-    setForm({ ...INITIAL_FORM, members: [] });
-    setErrors({});
-  }
-
-  function updateForm(patch: Partial<CreateFolderInput>) {
-    setForm((prev) => ({ ...prev, ...patch }));
-  }
-
   function toggleMember(memberId: string) {
-    setForm((prev) => {
-      const current = prev.members ?? [];
-      const exists = current.some((m) => m.id === memberId);
-      if (exists) {
-        return { ...prev, members: current.filter((m) => m.id !== memberId) };
-      }
+    const current = form.getValues('members') ?? [];
+    const exists = current.some((m) => m.id === memberId);
+    if (exists) {
+      form.setValue(
+        'members',
+        current.filter((m) => m.id !== memberId),
+      );
+    } else {
       const member = members.find((m) => m.id === memberId);
-      if (!member) return prev;
-      return {
-        ...prev,
-        members: [...current, { id: member.id, name: member.name, email: member.email }],
-      };
-    });
+      if (member) {
+        form.setValue('members', [...current, { id: member.id, name: member.name, email: member.email }]);
+      }
+    }
   }
 
   function handleOpenChange(value: boolean) {
     setOpen(value);
-    if (!value) resetForm();
-  }
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setErrors({});
-
-    const result = createFolderSchema.safeParse(form);
-    if (!result.success) {
-      const fieldErrors: Record<string, string> = {};
-      for (const issue of result.error.issues) {
-        const key = issue.path[0];
-        if (key) fieldErrors[String(key)] = issue.message;
-      }
-      setErrors(fieldErrors);
-      return;
-    }
-
-    createFolder.mutate(result.data, {
-      onSuccess: () => {
-        toast.success("Folder created");
-        setOpen(false);
-        resetForm();
-      },
-      onError: (err) => {
-        if (err instanceof AxiosError) {
-          toast.error(err.response?.data?.message ?? "Failed to create folder");
-        } else {
-          toast.error("An unexpected error occurred");
-        }
-      },
-    });
+    if (!value) form.reset({ ...DEFAULT_VALUES });
   }
 
   return {
     open,
     form,
-    errors,
     members,
-    isPending: createFolder.isPending,
+    isPending,
     handleOpenChange,
-    updateForm,
     toggleMember,
-    handleSubmit,
+    handleSubmit: form.handleSubmit(
+      async () =>
+        await handleCreateFolder({
+          form,
+          mutate: createFolder,
+          setOpen,
+        }),
+      (err) => {
+        console.log(err);
+      },
+    ),
   };
 }

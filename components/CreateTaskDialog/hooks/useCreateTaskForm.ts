@@ -1,17 +1,25 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { toast } from "sonner";
-import { AxiosError } from "axios";
+import { useState } from 'react';
+import { useForm, type UseFormReturn } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { toast } from 'sonner';
+import { AxiosError } from 'axios';
+import { z } from 'zod';
+import type { UseMutationResult } from '@tanstack/react-query';
 
-import { createTaskSchema, type CreateTaskInput } from "@/schema/taskSchema";
-import { useCreateTask } from "@/composables/mutations";
-import { useMembers, useFolders } from "@/composables/queries";
+import { createTaskSchema } from '@/schema/taskSchema';
+import { useCreateTask } from '@/composables/mutations';
+import { useMembers, useFolders } from '@/composables/queries';
+import type { ApiResponse } from '@/types/api';
+import type { Task } from '@/types/task';
 
-const INITIAL_FORM: CreateTaskInput = {
-  title: "",
-  description: "",
-  status: "BACKLOG",
+type CreateTaskForm = z.infer<typeof createTaskSchema>;
+
+const DEFAULT_VALUES: CreateTaskForm = {
+  title: '',
+  description: '',
+  status: 'BACKLOG',
   priority: undefined,
   assignee: undefined,
   start_date: undefined,
@@ -20,93 +28,96 @@ const INITIAL_FORM: CreateTaskInput = {
   folders: [],
 };
 
+interface HandleCreateTaskParams {
+  form: UseFormReturn<CreateTaskForm>;
+  mutate: UseMutationResult<ApiResponse<Task>, Error, CreateTaskForm, unknown>['mutate'];
+  setOpen: (open: boolean) => void;
+  defaultFolders?: { id: string; name: string }[];
+}
+
+async function handleCreateTask({ form, mutate, setOpen, defaultFolders }: HandleCreateTaskParams) {
+  const data = form.getValues();
+  mutate(data, {
+    onSuccess: () => {
+      toast.success('Task created');
+      setOpen(false);
+      form.reset({ ...DEFAULT_VALUES, folders: defaultFolders ?? [] });
+    },
+    onError: (err) => {
+      if (err instanceof AxiosError) {
+        toast.error(err.response?.data?.message ?? 'Failed to create task');
+      } else {
+        toast.error('An unexpected error occurred');
+      }
+    },
+  });
+}
+
 export function useCreateTaskForm(defaultFolders?: { id: string; name: string }[]) {
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState<CreateTaskInput>({
-    ...INITIAL_FORM,
-    folders: defaultFolders ?? [],
-  });
-  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const createTask = useCreateTask();
-  const { data: membersData } = useMembers();
-  const { data: foldersData } = useFolders();
+  const form = useForm<z.infer<typeof createTaskSchema>>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver(createTaskSchema as any),
+    defaultValues: { ...DEFAULT_VALUES, folders: defaultFolders ?? [] },
+  });
+
+  const { mutate: createTask, isPending, isError } = useCreateTask();
+  const {
+    data: membersData,
+    isPending: isMembersPending,
+    isLoading: isMembersLoading,
+    isError: isMembersError,
+  } = useMembers();
+  const {
+    data: foldersData,
+    isPending: isFoldersPending,
+    isLoading: isFoldersLoading,
+    isError: isFoldersError,
+  } = useFolders();
   const members = membersData?.data ?? [];
   const folders = foldersData?.data?.items ?? [];
 
-  function resetForm() {
-    setForm({ ...INITIAL_FORM, folders: defaultFolders ?? [] });
-    setErrors({});
-  }
-
-  function updateForm(patch: Partial<CreateTaskInput>) {
-    setForm((prev) => ({ ...prev, ...patch }));
+  function handleOpenChange(value: boolean) {
+    setOpen(value);
+    if (!value) form.reset({ ...DEFAULT_VALUES, folders: defaultFolders ?? [] });
   }
 
   function toggleFolder(folderId: string) {
-    setForm((prev) => {
-      const current = prev.folders ?? [];
-      const exists = current.some((f) => f.id === folderId);
-      if (exists) {
-        return { ...prev, folders: current.filter((f) => f.id !== folderId) };
-      }
+    const current = form.getValues('folders') ?? [];
+    const exists = current.some((f) => f.id === folderId);
+    if (exists) {
+      form.setValue(
+        'folders',
+        current.filter((f) => f.id !== folderId),
+      );
+    } else {
       const folder = folders.find((f) => f.id === folderId);
-      if (!folder) return prev;
-      return {
-        ...prev,
-        folders: [...current, { id: folder.id, name: folder.name }],
-      };
-    });
-  }
-
-  function handleOpenChange(value: boolean) {
-    setOpen(value);
-    if (!value) resetForm();
-  }
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setErrors({});
-
-    const result = createTaskSchema.safeParse(form);
-    if (!result.success) {
-      const fieldErrors: Record<string, string> = {};
-      for (const issue of result.error.issues) {
-        const key = issue.path[0];
-        if (key) fieldErrors[String(key)] = issue.message;
+      if (folder) {
+        form.setValue('folders', [...current, { id: folder.id, name: folder.name }]);
       }
-      setErrors(fieldErrors);
-      return;
     }
-
-    createTask.mutate(result.data, {
-      onSuccess: () => {
-        toast.success("Task created");
-        setOpen(false);
-        resetForm();
-      },
-      onError: (err) => {
-        if (err instanceof AxiosError) {
-          toast.error(
-            err.response?.data?.message ?? "Failed to create task",
-          );
-        } else {
-          toast.error("An unexpected error occurred");
-        }
-      },
-    });
   }
 
   return {
     open,
     form,
-    errors,
     members,
     folders,
-    isPending: createTask.isPending,
+    isPending,
     handleOpenChange,
-    updateForm,
     toggleFolder,
-    handleSubmit,
+    handleSubmit: form.handleSubmit(
+      async () =>
+        await handleCreateTask({
+          form,
+          mutate: createTask,
+          setOpen,
+          defaultFolders,
+        }),
+      (err) => {
+        console.log(err);
+      },
+    ),
   };
 }

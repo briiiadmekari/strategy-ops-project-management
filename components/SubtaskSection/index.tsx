@@ -1,5 +1,6 @@
 'use client';
 
+import { Controller, type UseFormReturn } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,7 +9,8 @@ import { CustomDialog } from '@/components/CustomDialog';
 import { CustomInput, type SelectOption } from '@/components/CustomInput';
 import { TASK_STATUSES, TASK_STATUS_LABELS, TASK_STATUS_COLORS } from '@/constant/task';
 import { TASK_PRIORITIES, TASK_PRIORITY_LABELS, TASK_PRIORITY_COLORS } from '@/constant/task';
-import type { SubtaskInput } from '@/schema/taskSchema';
+import { z } from 'zod';
+import { subtaskSchema } from '@/schema/taskSchema';
 import { PlusIcon, TrashIcon, PencilIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatDateDisplay } from '@/utils/date';
@@ -38,13 +40,12 @@ export function SubtaskSection({ task }: SubtaskSectionProps) {
     subtasks,
     dialogOpen,
     editDialogOpen,
-    form,
-    errors,
+    addForm,
+    editForm,
     isPending,
     handleDialogOpenChange,
     handleEditOpen,
     handleEditDialogOpenChange,
-    updateForm,
     handleAddSubmit,
     handleEditSubmit,
     handleSubtaskStatusChange,
@@ -65,19 +66,15 @@ export function SubtaskSection({ task }: SubtaskSectionProps) {
             <AddSubtaskDialog
               open={dialogOpen}
               onOpenChange={handleDialogOpenChange}
-              form={form}
-              errors={errors}
+              form={addForm}
               isPending={isPending}
-              updateForm={updateForm}
               onSubmit={handleAddSubmit}
             />
             <EditSubtaskDialog
               open={editDialogOpen}
               onOpenChange={handleEditDialogOpenChange}
-              form={form}
-              errors={errors}
+              form={editForm}
               isPending={isPending}
-              updateForm={updateForm}
               onSubmit={handleEditSubmit}
             />
           </div>
@@ -193,22 +190,17 @@ function SubtaskRow({ subtask, index, isPending, onStatusChange, onEdit, onDelet
 interface AddSubtaskDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  form: SubtaskInput;
-  errors: Record<string, string>;
+  form: UseFormReturn<z.infer<typeof subtaskSchema>>;
   isPending: boolean;
-  updateForm: (patch: Partial<SubtaskInput>) => void;
   onSubmit: (e: React.FormEvent) => void;
 }
 
-function AddSubtaskDialog({
-  open,
-  onOpenChange,
-  form,
-  errors,
-  isPending,
-  updateForm,
-  onSubmit,
-}: AddSubtaskDialogProps) {
+function AddSubtaskDialog({ open, onOpenChange, form, isPending, onSubmit }: AddSubtaskDialogProps) {
+  const {
+    control,
+    formState: { errors },
+  } = form;
+
   return (
     <CustomDialog
       open={open}
@@ -226,57 +218,81 @@ function AddSubtaskDialog({
       isPending={isPending}
       onCancel={() => onOpenChange(false)}
     >
-      <CustomInput
-        label="Title"
-        value={form.title}
-        onChange={(e) => updateForm({ title: e.target.value })}
-        placeholder="Enter subtask title"
-        error={errors.title}
+      <Controller
+        control={control}
+        name="title"
+        render={({ field }) => (
+          <CustomInput
+            label="Title"
+            value={field.value}
+            onChange={field.onChange}
+            placeholder="Enter subtask title"
+            error={errors.title?.message}
+          />
+        )}
       />
 
-      <CustomInput
-        type="textarea"
-        label="Description"
-        value={form.description ?? ''}
-        onChange={(e) => updateForm({ description: e.target.value })}
-        placeholder="Enter description (optional)"
+      <Controller
+        control={control}
+        name="description"
+        render={({ field }) => (
+          <CustomInput
+            type="textarea"
+            label="Description"
+            value={field.value ?? ''}
+            onChange={field.onChange}
+            placeholder="Enter description (optional)"
+          />
+        )}
       />
 
       <div className="grid grid-cols-2 gap-4">
-        <CustomInput
-          type="select"
-          label="Status"
-          value={form.status}
-          onValueChange={(value) => updateForm({ status: value as SubtaskInput['status'] })}
-          options={statusOptions}
+        <Controller
+          control={control}
+          name="status"
+          render={({ field }) => (
+            <CustomInput
+              type="select"
+              label="Status"
+              value={field.value}
+              onValueChange={(value) => field.onChange(value as z.infer<typeof subtaskSchema>['status'])}
+              options={statusOptions}
+            />
+          )}
         />
 
-        <CustomInput
-          type="select"
-          label="Priority"
-          value={form.priority ?? 'none'}
-          onValueChange={(value) =>
-            updateForm({
-              priority: value === 'none' ? undefined : (value as SubtaskInput['priority']),
-            })
-          }
-          options={priorityOptions}
-          placeholder="None"
+        <Controller
+          control={control}
+          name="priority"
+          render={({ field }) => (
+            <CustomInput
+              type="select"
+              label="Priority"
+              value={field.value ?? 'none'}
+              onValueChange={(value) =>
+                field.onChange(value === 'none' ? undefined : (value as z.infer<typeof subtaskSchema>['priority']))
+              }
+              options={priorityOptions}
+              placeholder="None"
+            />
+          )}
         />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <CustomInput
-          type="date"
-          label="Start Date"
-          value={form.start_date}
-          onDateChange={(val) => updateForm({ start_date: val })}
+        <Controller
+          control={control}
+          name="start_date"
+          render={({ field }) => (
+            <CustomInput type="date" label="Start Date" value={field.value} onDateChange={field.onChange} />
+          )}
         />
-        <CustomInput
-          type="date"
-          label="Due Date"
-          value={form.due_date}
-          onDateChange={(val) => updateForm({ due_date: val })}
+        <Controller
+          control={control}
+          name="due_date"
+          render={({ field }) => (
+            <CustomInput type="date" label="Due Date" value={field.value} onDateChange={field.onChange} />
+          )}
         />
       </div>
     </CustomDialog>
@@ -286,22 +302,17 @@ function AddSubtaskDialog({
 interface EditSubtaskDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  form: SubtaskInput;
-  errors: Record<string, string>;
+  form: UseFormReturn<z.infer<typeof subtaskSchema>>;
   isPending: boolean;
-  updateForm: (patch: Partial<SubtaskInput>) => void;
   onSubmit: (e: React.FormEvent) => void;
 }
 
-function EditSubtaskDialog({
-  open,
-  onOpenChange,
-  form,
-  errors,
-  isPending,
-  updateForm,
-  onSubmit,
-}: EditSubtaskDialogProps) {
+function EditSubtaskDialog({ open, onOpenChange, form, isPending, onSubmit }: EditSubtaskDialogProps) {
+  const {
+    control,
+    formState: { errors },
+  } = form;
+
   return (
     <CustomDialog
       open={open}
@@ -313,57 +324,81 @@ function EditSubtaskDialog({
       isPending={isPending}
       onCancel={() => onOpenChange(false)}
     >
-      <CustomInput
-        label="Title"
-        value={form.title}
-        onChange={(e) => updateForm({ title: e.target.value })}
-        placeholder="Enter subtask title"
-        error={errors.title}
+      <Controller
+        control={control}
+        name="title"
+        render={({ field }) => (
+          <CustomInput
+            label="Title"
+            value={field.value}
+            onChange={field.onChange}
+            placeholder="Enter subtask title"
+            error={errors.title?.message}
+          />
+        )}
       />
 
-      <CustomInput
-        type="textarea"
-        label="Description"
-        value={form.description ?? ''}
-        onChange={(e) => updateForm({ description: e.target.value })}
-        placeholder="Enter description (optional)"
+      <Controller
+        control={control}
+        name="description"
+        render={({ field }) => (
+          <CustomInput
+            type="textarea"
+            label="Description"
+            value={field.value ?? ''}
+            onChange={field.onChange}
+            placeholder="Enter description (optional)"
+          />
+        )}
       />
 
       <div className="grid grid-cols-2 gap-4">
-        <CustomInput
-          type="select"
-          label="Status"
-          value={form.status}
-          onValueChange={(value) => updateForm({ status: value as SubtaskInput['status'] })}
-          options={statusOptions}
+        <Controller
+          control={control}
+          name="status"
+          render={({ field }) => (
+            <CustomInput
+              type="select"
+              label="Status"
+              value={field.value}
+              onValueChange={(value) => field.onChange(value as z.infer<typeof subtaskSchema>['status'])}
+              options={statusOptions}
+            />
+          )}
         />
 
-        <CustomInput
-          type="select"
-          label="Priority"
-          value={form.priority ?? 'none'}
-          onValueChange={(value) =>
-            updateForm({
-              priority: value === 'none' ? undefined : (value as SubtaskInput['priority']),
-            })
-          }
-          options={priorityOptions}
-          placeholder="None"
+        <Controller
+          control={control}
+          name="priority"
+          render={({ field }) => (
+            <CustomInput
+              type="select"
+              label="Priority"
+              value={field.value ?? 'none'}
+              onValueChange={(value) =>
+                field.onChange(value === 'none' ? undefined : (value as z.infer<typeof subtaskSchema>['priority']))
+              }
+              options={priorityOptions}
+              placeholder="None"
+            />
+          )}
         />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <CustomInput
-          type="date"
-          label="Start Date"
-          value={form.start_date}
-          onDateChange={(val) => updateForm({ start_date: val })}
+        <Controller
+          control={control}
+          name="start_date"
+          render={({ field }) => (
+            <CustomInput type="date" label="Start Date" value={field.value} onDateChange={field.onChange} />
+          )}
         />
-        <CustomInput
-          type="date"
-          label="Due Date"
-          value={form.due_date}
-          onDateChange={(val) => updateForm({ due_date: val })}
+        <Controller
+          control={control}
+          name="due_date"
+          render={({ field }) => (
+            <CustomInput type="date" label="Due Date" value={field.value} onDateChange={field.onChange} />
+          )}
         />
       </div>
     </CustomDialog>
